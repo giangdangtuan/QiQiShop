@@ -47,14 +47,6 @@ public class OtpServiceImpl extends BaseService implements OtpService {
     private final UserRepository userRepository;
     private final SendEmailServiceImpl sendEmailService;
 
-    @Value("${zns.config.template_id}")
-    private int ID_TEMPLATE;
-    @Value("${zns.config.oa_id}")
-    private String OA_ID;
-    @Value("${zns.config.url}")
-    private String URL;
-    @Value("${zns.config.apikey}")
-    private String API_KEY;
     @Value("${spring.mail.username}")
     private String EMAIL_SENDER;
     @Value("${spring.mail.password}")
@@ -92,11 +84,6 @@ public class OtpServiceImpl extends BaseService implements OtpService {
 
         SendOtp result = new SendOtp();
         switch (request.getType()) {
-            case ZNS:
-                sendZns(request, otp.getOtp());
-                result.setId(otp.getId());
-                result.setPhone(otp.getPhone());
-                break;
             case SMS:
                 // Call func send otp with SMS
 //                Phục vụ test
@@ -113,37 +100,6 @@ public class OtpServiceImpl extends BaseService implements OtpService {
                 throw new BusinessException(Translator.toLocale("invalid_request"), HttpStatus.BAD_REQUEST);
         }
         return result;
-    }
-
-    private void sendZns(SendOtpReq request, String otp) {
-        RestTemplate restTemplate = new RestTemplate();
-
-        Map<String, Object> templateDate = new HashMap<>();
-        templateDate.put("otp", otp);
-
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("phone", request.getPhone());
-        payload.put("oa_id", OA_ID);
-        payload.put("template_id", ID_TEMPLATE);
-        payload.put("template_data", templateDate);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(API_KEY);
-
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(payload, headers);
-        try {
-            ResponseEntity<String> response = restTemplate.postForEntity(URL, entity, String.class);
-
-            ObjectMapper mapper = new ObjectMapper();
-            ZnsResponse znsResponse = mapper.readValue(response.getBody(), ZnsResponse.class);
-            if (znsResponse.getErrorCode() != 0) {
-                throw new BusinessException(znsResponse.getErrorMessage(), HttpStatus.BAD_REQUEST);
-            }
-        } catch (Exception e) {
-            throw new BusinessException(Translator.toLocale("send_otp_error"), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
     }
 
     private void sendEmail(SendOtpReq request, String otp, OtpSendPurpose purpose) {

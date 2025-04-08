@@ -15,7 +15,6 @@ import java.sql.Date;
 public class EditMyProfileReq {
     @NotBlank
     String name;
-    String address;
     Date birthday;
     Gender gender;
     Integer avatarId;

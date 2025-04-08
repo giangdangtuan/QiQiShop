@@ -90,8 +90,8 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
     public List<UserListRes> getUsers(ActiveStatus status, String searchKeyword, int page, Role role) {
 
         BooleanBuilder builder = new BooleanBuilder();
-        builder.and(qRole.objectId.eq(role.getObjectId()));
-        builder.and(qRole.type.eq(role.getType()));
+//        builder.and(qRole.objectId.eq(role.getObjectId()));
+//        builder.and(qRole.type.eq(role.getType()));
         if (status != null) {
             builder.and(qUser.status.eq(status));
         }
@@ -102,11 +102,11 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
                     qUser.email.contains(searchKeyword));
         }
         return query().from(qUser)
-                .innerJoin(qRole).on(qRole.id.eq(qUser.roleId))
+//                .innerJoin(qRole).on(qRole.id.eq(qUser.roleId))
                 .where(builder)
                 .select(Projections.fields(UserListRes.class,
                         qUser.id, qUser.code, qUser.name, qUser.email,
-                        qUser.address, qUser.phone, qUser.status,
+                        qUser.phone, qUser.status,
                         qUser.birthday, qUser.gender,
                         Projections.fields(RoleDetail.class,
                                         qRole.id.as("roleId"),
@@ -134,14 +134,24 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
                 .where(builder)
                 .select(Projections.fields(UserDetailRes.class,
                         qUser.id, qUser.code, qUser.phone, qUser.name,
-                        qUser.email, qUser.address, qUser.birthday, qUser.gender,
+                        qUser.email, qUser.birthday, qUser.gender,
                         qUser.status,
                         Projections.fields(RoleDetail.class,
                                         qRole.id.as("roleId"),
                                         qRole.objectId,
                                         qRole.type.as("roleType"),
                                         qRole.name.as("roleName"))
-                                .as("role"))
+                                .as("role")
+//                        Projections.fields(PermissionRes.class,
+//                                        qPermission.id.as("permisstionId"),
+//                                        qPermission.title.as("title"),
+//                                        qPermission.permission.getRoot(),
+//                                        qPermission.isView.as("isView"),
+//                                        qPermission.isWrite.as("isWrite"),
+//                                        qPermission.isApproval.as("isApproval"),
+//                                        qPermission.isDecision.as("isDecision"))
+//                                .as("permissions")
+                        )
                 )
                 .fetchOne();
     }

@@ -18,7 +18,6 @@ public class UserListRes {
     String code;
     String name;
     String email;
-    String address;
     String phone;
     ActiveStatus status;
     Date birthday;

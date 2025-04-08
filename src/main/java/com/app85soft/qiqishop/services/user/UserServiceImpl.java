@@ -2,6 +2,7 @@ package com.app85soft.qiqishop.services.user;
 
 import com.app85soft.qiqishop.component.Translator;
 import com.app85soft.qiqishop.dto.constant.ActiveStatus;
+import com.app85soft.qiqishop.dto.constant.RoleType;
 import com.app85soft.qiqishop.dto.constant.VerifyStatus;
 import com.app85soft.qiqishop.dto.request.ChangePasswordReq;
 import com.app85soft.qiqishop.dto.request.IdsRequest;
@@ -88,7 +89,7 @@ public class UserServiceImpl extends BaseService implements UserService {
                 throw new BusinessException(Translator.toLocale("otp_over"));
             }
             sessionAuth.setAttemptCount(sessionAuth.getAttemptCount() - 1);
-            if (!sessionAuth.getPhone().equals(request.getAccountPhone())) {
+            if (!sessionAuth.getPhone().equals(request.getPhone())) {
                 sessionAuth.setStatus(VerifyStatus.FAILED);
                 throw new BusinessException(Translator.toLocale("register_fail"));
             }
@@ -103,13 +104,13 @@ public class UserServiceImpl extends BaseService implements UserService {
         String code = generateCode(8);
 
         Role role = new Role();
-        role.setObjectId(request.getBusinessRole().toValue());
+        role.setObjectId(1);
         role.setStatus(ActiveStatus.ACTIVE);
-        role.setName(request.getBusinessName());
-        role.setType(request.getBusinessRole());
+        role.setName("User");
+        role.setType(RoleType.USER);
         roleRepository.save(role);
 
-        List<Permission> permissions = permissionRepository.getPermissions(request.getBusinessRole());
+        List<Permission> permissions = permissionRepository.getPermissions(RoleType.USER);
         List<RolePermission> rolePermissions = new ArrayList<>();
         for (Permission permission : permissions) {
             RolePermission rolePermission = new RolePermission();
@@ -125,9 +126,9 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         User user = new User();
         user.setCode(code);
-        user.setPhone(request.getAccountPhone());
-        user.setEmail(request.getBusinessEmail());
-        user.setName(request.getAccountName());
+        user.setPhone(request.getPhone());
+        user.setEmail(request.getEmail());
+        user.setName(request.getName());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setStatus(ActiveStatus.ACTIVE);
         user.setRoleId(role.getId());
@@ -192,9 +193,6 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
         if (request.getName() != null && !request.getName().isEmpty()) {
             currentUser.setName(request.getName());
-        }
-        if (request.getAddress() != null && !request.getAddress().isEmpty()) {
-            currentUser.setAddress(request.getAddress());
         }
         if (request.getBirthday() != null) {
             currentUser.setBirthday(request.getBirthday());
@@ -292,9 +290,6 @@ public class UserServiceImpl extends BaseService implements UserService {
         if (request.getName() != null && !request.getName().isEmpty()) {
             user.setName(request.getName());
         }
-        if (request.getAddress() != null && !request.getAddress().isEmpty()) {
-            user.setAddress(request.getAddress());
-        }
         if (request.getBirthday() != null) {
             user.setBirthday(request.getBirthday());
         }
@@ -320,7 +315,6 @@ public class UserServiceImpl extends BaseService implements UserService {
                 .id(user.getId())
                 .code(user.getCode())
                 .name(user.getName())
-                .address(user.getAddress())
                 .phone(user.getPhone())
                 .email(user.getEmail())
                 .role(roleDetail)

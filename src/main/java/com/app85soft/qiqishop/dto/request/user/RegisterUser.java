@@ -12,18 +12,10 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RegisterUser {
     @NotBlank
-    String businessName;
-    String businessPhone;
-    String businessEmail;
-    String businessAddress;
-    String businessTax;
+    String name;
+    String phone;
+    String email;
 
-    @NotNull
-    RoleType businessRole;
-
-    @NotBlank
-    String accountPhone;
-    String accountName;
     @NotBlank
     String password;
     @NotBlank

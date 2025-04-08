@@ -6,8 +6,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "Loại quyền hạn của người dùng: 0 - ADMIN, 1 - USER", type = "integer")
 public enum RoleType implements BaseEnum<Integer> {
-    ADMIN(0),
-    USER(1);
+    SUPER_ADMIN(0),
+    USER(1),
+    ACOUNT_ADMIN(1),
+    PRODUCT_ADMIN(1),
+    POST_ADMIN(1);
 
     final int value;
 

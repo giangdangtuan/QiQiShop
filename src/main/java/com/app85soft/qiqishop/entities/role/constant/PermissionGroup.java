@@ -6,7 +6,9 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum PermissionGroup implements BaseEnum<String> {
     STATISTIC,
-    CONFIG;
+    CONFIG,
+    FEATURE;
+
 
     @JsonCreator
     public static PermissionGroup fromValue(String value) {

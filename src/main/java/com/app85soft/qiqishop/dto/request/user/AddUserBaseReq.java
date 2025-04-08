@@ -16,7 +16,6 @@ public class AddUserBaseReq {
     String phone;
     @NotBlank
     String email;
-    String address;
     @NotBlank
     String password;
     @NotBlank

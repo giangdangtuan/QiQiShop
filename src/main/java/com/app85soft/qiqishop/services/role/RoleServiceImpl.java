@@ -131,7 +131,7 @@ public class RoleServiceImpl extends BaseService implements RoleService {
     @Override
     public List<PermissionRes> getPermissions() {
         User user = getUser(PermissionKey.READ, PermissionType.ROLE);
-        List<Permission> permissions = permissionRepository.getPermissions(RoleType.ADMIN);
+        List<Permission> permissions = permissionRepository.getPermissions(RoleType.SUPER_ADMIN);
         List<PermissionRes> permissionRes = new ArrayList<>();
         for (Permission item : permissions) {
             PermissionRes permission = new PermissionRes();

@@ -120,7 +120,7 @@ public class RoleRepositoryImpl extends BaseRepository implements RoleRepository
         }
         if (roleType != null) {
             builder.andAnyOf(
-                    qPermission.type.eq(RoleType.ADMIN),
+                    qPermission.type.eq(RoleType.SUPER_ADMIN),
                     qPermission.type.eq(roleType)
             );
         }

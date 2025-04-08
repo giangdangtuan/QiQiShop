@@ -21,7 +21,6 @@ public class UserDetailRes {
     String phone;
     String name;
     String email;
-    String address;
     Date birthday;
     Gender gender;
     Integer avatarId;

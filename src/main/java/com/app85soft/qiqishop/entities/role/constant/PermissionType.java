@@ -10,12 +10,9 @@ public enum PermissionType implements BaseEnum<String> {
     ACCOUNT,
     ROLE,
 
-    PROVIDER_CONTENT,
-    PROVIDER_DEVICE,
-    MERCHANT,
-    MERCHANT_BRANCH,
-    DEVICE,
-    SONG
+    PRODUCT,
+    POST,
+    TRANSACTION
     ;
 
 

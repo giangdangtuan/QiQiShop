@@ -25,7 +25,6 @@ public class UpdateUserByAdminReq {
     @NotBlank
     String phone;
     String email;
-    String address;
     Gender gender;
     Date birthday;
     ActiveStatus status;
