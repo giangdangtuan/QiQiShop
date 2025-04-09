@@ -45,9 +45,8 @@ public class RoleController {
     @Operation(summary = "Get role")
     @GetMapping("v1/role/list")
     public ResponseEntity<BaseResponse<List<RoleRes>>> getRoleList(@RequestParam int page,
-                                                                   @RequestParam(required = false) ActiveStatus status,
-                                                                   @Parameter(description = "[name]")
-                                                                   @RequestParam(required = false) String searchKeyword) {
+            @RequestParam(required = false) ActiveStatus status,
+            @Parameter(description = "[name]") @RequestParam(required = false) String searchKeyword) {
         return ResponseEntity.ok(roleService.getRoles(status, searchKeyword, page));
     }
 
