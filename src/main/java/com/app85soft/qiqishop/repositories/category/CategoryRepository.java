@@ -7,5 +7,5 @@ import com.app85soft.qiqishop.entities.category.Category;
 
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Integer>, CategoryRepositoryCustom {
-    
+    boolean existByName(String name);
 }

@@ -13,7 +13,7 @@ public class CategoryRepositorylmpl implements CategoryRepositoryCustom {
 
     @Override
     public long countCategory(ActiveStatus status, String searchKeyword, Role role) {
-        // TODO Auto-generated method stub
+        
         throw new UnsupportedOperationException("Unimplemented method 'countCategory'");
     }
 

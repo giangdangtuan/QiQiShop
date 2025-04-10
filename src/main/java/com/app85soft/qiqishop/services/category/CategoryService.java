@@ -2,8 +2,8 @@ package com.app85soft.qiqishop.services.category;
 
 import java.util.List;
 
-import com.app85soft.qiqishop.dto.request.IdsRequest;
 import com.app85soft.qiqishop.dto.constant.ActiveStatus;
+import com.app85soft.qiqishop.dto.request.IdsRequest;
 import com.app85soft.qiqishop.dto.request.category.AddCategoryReq;
 import com.app85soft.qiqishop.dto.request.category.UpdateCategoryReq;
 import com.app85soft.qiqishop.dto.response.BaseResponse;
@@ -15,7 +15,8 @@ public interface CategoryService {
 
     Category addCategory(AddCategoryReq request);
 
-    CategoryListRes updateCategory(UpdateCategoryReq request);
+    BaseResponse<List<CategoryListRes>>  updateCategory(UpdateCategoryReq request,
+    ActiveStatus status, String searchKeyword, int page);
 
     List<Integer> deleteCategory(IdsRequest request);
 
