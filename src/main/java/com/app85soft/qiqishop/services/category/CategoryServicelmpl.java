@@ -2,12 +2,10 @@ package com.app85soft.qiqishop.services.category;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.app85soft.qiqishop.component.Translator;
 import com.app85soft.qiqishop.dto.constant.ActiveStatus;
-import com.app85soft.qiqishop.dto.request.IdsRequest;
 import com.app85soft.qiqishop.dto.request.category.AddCategoryReq;
 import com.app85soft.qiqishop.dto.request.category.UpdateCategoryReq;
 import com.app85soft.qiqishop.dto.response.BaseResponse;
@@ -31,28 +29,40 @@ public class CategoryServicelmpl extends BaseService implements CategoryService 
     public BaseResponse<List<CategoryListRes>> getCategories(ActiveStatus status, String searchKeyword, int page) {
         User user = getUser(PermissionKey.READ, PermissionType.PRODUCT);
 
-        long count = categoryRepository.countCategory(status, searchKeyword, user.getRole());
-        List<CategoryListRes> categories = categoryRepository.getCategories(status, searchKeyword, page,
-                user.getRole());
+        long count = categoryRepository.countCategory(status, searchKeyword);
+        List<CategoryListRes> categories = categoryRepository.getCategories();
         return new BaseResponse<>(categories, count, page);
     }
 
     @Override
     public Category addCategory(AddCategoryReq request) {
     User user = getUser(PermissionKey.READ, PermissionType.PRODUCT);
-        if (categoryRepository.existByName(request.getName())) {
-            throw new BusinessException(Translator.toLocale("phone_already_exists"), HttpStatus.BAD_REQUEST);
-        }
+       
         Category newCategory = new Category();
         newCategory.setName(request.getName());
 
         return categoryRepository.save(newCategory);
     }
 
+    
+
+    // @Override
+    // public List<Integer> deleteCategory(IdsRequest request) {
+    //     User user = getUser(PermissionKey.DECISION, PermissionType.ACCOUNT);
+    //     List<Integer> categoryIds = request.getIds();
+    //     List<Integer> existingIds = categoryRepository.getAllIdToCheckExist(categoryIds);
+    //     List<Integer> nonExistingIds = categoryIds.stream().filter(id -> !existingIds.contains(id)).toList();
+    //     if (!nonExistingIds.isEmpty()) {
+    //         throw new BusinessException(Translator.toLocale("id_not_exist"), HttpStatus.BAD_REQUEST);
+    //     }
+    //     categoryRepository.deleteCategories(categoryIds);
+    //     return categoryIds;
+    // }
+
     @Override
-    public BaseResponse<List<CategoryListRes>> updateCategory(UpdateCategoryReq request,ActiveStatus status, String searchKeyword, int page) {
+    public List<CategoryListRes>  updateCategory(UpdateCategoryReq request) {
         User user = getUser(PermissionKey.DECISION, PermissionType.ACCOUNT);
-        Category currentCategory = categoryRepository.getCategoryToUpdate(request.getCategoryId(), user.getRole());
+        Category currentCategory = categoryRepository.getCategoryToUpdate(request.getCategoryId());
         
         if (currentCategory == null) {
             throw new BusinessException(Translator.toLocale("category_id_not_exist"));
@@ -61,17 +71,8 @@ public class CategoryServicelmpl extends BaseService implements CategoryService 
             currentCategory.setName(request.getName());
         }
         categoryRepository.save(currentCategory);
-        long count = categoryRepository.countCategory(status, searchKeyword, user.getRole());
-        List<CategoryListRes> categories = categoryRepository.getCategories(status, searchKeyword, page,
-                user.getRole());
-        return new BaseResponse<>(categories, count, page);
-    }
-
-    @Override
-    public List<Integer> deleteCategory(IdsRequest request) {
-        User user = getUser(PermissionKey.DECISION, PermissionType.ACCOUNT);
-        
-        throw new UnsupportedOperationException("Unimplemented method 'deleteCategory'");
+        List<CategoryListRes> categories = categoryRepository.getCategories();
+        return categories;
     }
 
 }
