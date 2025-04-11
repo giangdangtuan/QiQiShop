@@ -1,0 +1,26 @@
+package com.app85soft.qiqishop.repositories.product;
+
+import com.app85soft.qiqishop.dto.constant.ActiveStatus;
+import com.app85soft.qiqishop.dto.response.product.ProductRes;
+import com.app85soft.qiqishop.entities.product.Product;
+
+import java.util.List;
+
+public interface ProductRepositoryCustom {
+
+    boolean existsByCode (String code);
+
+    long countProduct(ActiveStatus status, String searchKeyword, Integer categoryId);
+
+    List<ProductRes> getProduct(ActiveStatus status, String searchKeyword, Integer categoryId, int page);
+
+    ProductRes getProductDetail(int productId);
+
+    Product getProductToUpdate(int id);
+
+    List<Integer> getAllIdToCheckExist(List<Integer> productIds);
+
+    void deleteProducts(List<Integer> productIds);
+
+
+}

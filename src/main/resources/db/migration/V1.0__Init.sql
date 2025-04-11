@@ -31,11 +31,13 @@ CREATE TABLE `category`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci;
 
+
 CREATE TABLE `product`
 (
     `id`                     int unsigned NOT NULL AUTO_INCREMENT,
     `category_id`            int unsigned NOT NULL COMMENT 'Khóa ngoại tham chiếu đến ngành hàng',
     `cover_image`            int unsigned          DEFAULT NULL COMMENT 'Khóa ngoại tham chiếu đến ảnh bìa sản phẩm',
+    `code`                   varchar(50)  NOT NULL COMMENT 'Mã sản phẩm duy nhất',
     `name`                   varchar(255) NOT NULL,
     `description`            TEXT                  DEFAULT NULL,
     `status`                 int          NOT NULL COMMENT 'Trạng thái hoạt động: `0`: Không hoạt động, 1: Hoạt động',
@@ -43,6 +45,7 @@ CREATE TABLE `product`
     `created_at`             datetime     NOT NULL,
     `updated_at`             datetime     NOT NULL,
     PRIMARY KEY (`id`),
+    UNIQUE  KEY (`code`),
     FOREIGN KEY (`category_id`) REFERENCES `category` (`id`),
     FOREIGN KEY (`cover_image`) REFERENCES `upload_files` (`id`)
 ) ENGINE = InnoDB COMMENT 'Sản phẩm'
@@ -53,67 +56,55 @@ CREATE TABLE `model`
 (
     `id`                     int unsigned    NOT NULL AUTO_INCREMENT,
     `product_id`             int unsigned    NOT NULL COMMENT 'Khóa ngoại tham chiếu đến ngành hàng',
-    `cover_image`            int unsigned    NOT NULL COMMENT 'Khóa ngoại tham chiếu đến ảnh bìa sản phẩm',
-    `name`                   varchar(255)    NOT NULL,
+    `cover_image`            int unsigned             DEFAULT NULL COMMENT 'Khóa ngoại tham chiếu đến ảnh bìa sản phẩm biến thể',
+    `code`                   varchar(50)     NOT NULL COMMENT 'Mã sản phẩm duy nhất',
+    `name`                   varchar(255)             DEFAULT NULL,
     `has_discount`           bit             NOT NULL DEFAULT 0 COMMENT '`0`: Không khuyến mại, `1`: Có khuyến mại',
-    `discount_percentage`    int                      DEFAULT NULL,
+    `discount_percentage`    int             NOT NULL DEFAULT 0,
     `price`                  DECIMAL(10, 2)  NOT NULL COMMENT 'Giá sản phẩm',
-    `stock`                  int             NOT NULL COMMENT 'Số lượng hàng tồn',
+    `stock`                  int             NOT NULL DEFAULT 0 COMMENT 'Số lượng hàng tồn',
+    `sold_count`             int             NOT NULL DEFAULT 0 COMMENT 'Số lượng đã bán',
     `deleted`                bit             NOT NULL DEFAULT 0 COMMENT 'Đánh dấu trạng thái xóa của bản ghi: `0`: Chưa xóa, `1`: Đã xóa',
     `created_at`             datetime        NOT NULL,
     `updated_at`             datetime        NOT NULL,
     PRIMARY KEY (`id`),
+    UNIQUE  KEY (`code`),
     FOREIGN KEY (`product_id`) REFERENCES `product` (`id`),
     FOREIGN KEY (`cover_image`) REFERENCES `upload_files` (`id`)
 ) ENGINE = InnoDB COMMENT 'Sản phẩm biến thể'
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci;
 
--- CREATE TABLE `promotion`
--- (
---     `id`                     int unsigned    NOT NULL AUTO_INCREMENT,
---     `name`                   varchar(255)    NOT NULL,
---     `start_time`             BIGINT          NOT NULL COMMENT 'Ngày bắt đầu khuyển mãi',
---     `end_time`               BIGINT          NOT NULL COMMENT 'Ngày kết thúc khuyến mãi',
---     `deleted`                bit             NOT NULL DEFAULT 0 COMMENT 'Đánh dấu trạng thái xóa của bản ghi: `0`: Chưa xóa, `1`: Đã xóa',
---     `created_at`             datetime        NOT NULL,
---     `updated_at`             datetime        NOT NULL,
---     PRIMARY KEY (`id`)
--- ) ENGINE = InnoDB COMMENT 'Khuyến mãi'
---   DEFAULT CHARSET = utf8mb4
---   COLLATE = utf8mb4_0900_ai_ci;
---
--- CREATE TABLE `promotion_model`
--- (
---     `id`                  int unsigned NOT NULL AUTO_INCREMENT,
---     `promotion_id`        int unsigned NOT NULL COMMENT 'Khóa ngoại tham chiếu đến khuyến mãi',
---     `model_id`            int unsigned NOT NULL COMMENT 'Khóa ngoại tham chiếu đến sản phẩm biến thể',
---     `discount_percentage` int          DEFAULT NULL COMMENT 'Phần trăm giảm giá riêng cho model này (nếu có)',
---     `deleted`             bit          NOT NULL DEFAULT 0 COMMENT 'Đánh dấu trạng thái xóa của bản ghi: `0`: Chưa xóa, `1`: Đã xóa',
---     `created_at`          datetime     NOT NULL,
---     `updated_at`          datetime     NOT NULL,
---     PRIMARY KEY (`id`),
---     FOREIGN KEY (`promotion_id`) REFERENCES `promotion` (`id`),
---     FOREIGN KEY (`model_id`) REFERENCES `model` (`id`)
--- ) ENGINE = InnoDB COMMENT 'Khuyến mãi áp dụng cho sản phẩm biến thể'
---   DEFAULT CHARSET = utf8mb4
---   COLLATE = utf8mb4_0900_ai_ci;
+CREATE TABLE `promotion`
+(
+    `id`                     int unsigned    NOT NULL AUTO_INCREMENT,
+    `name`                   varchar(255)    NOT NULL,
+    `start_time`             BIGINT          NOT NULL COMMENT 'Ngày bắt đầu khuyển mãi',
+    `end_time`               BIGINT          NOT NULL COMMENT 'Ngày kết thúc khuyến mãi',
+    `deleted`                bit             NOT NULL DEFAULT 0 COMMENT 'Đánh dấu trạng thái xóa của bản ghi: `0`: Chưa xóa, `1`: Đã xóa',
+    `created_at`             datetime        NOT NULL,
+    `updated_at`             datetime        NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB COMMENT 'Khuyến mãi'
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
 
+CREATE TABLE `promotion_model`
+(
+    `id`                  int unsigned NOT NULL AUTO_INCREMENT,
+    `promotion_id`        int unsigned NOT NULL COMMENT 'Khóa ngoại tham chiếu đến khuyến mãi',
+    `model_id`            int unsigned NOT NULL COMMENT 'Khóa ngoại tham chiếu đến sản phẩm biến thể',
+    `discount_percentage` int                   DEFAULT NULL COMMENT 'Phần trăm giảm giá riêng cho model này (nếu có)',
+    `deleted`             bit          NOT NULL DEFAULT 0 COMMENT 'Đánh dấu trạng thái xóa của bản ghi: `0`: Chưa xóa, `1`: Đã xóa',
+    `created_at`          datetime     NOT NULL,
+    `updated_at`          datetime     NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`promotion_id`) REFERENCES `promotion` (`id`),
+    FOREIGN KEY (`model_id`) REFERENCES `model` (`id`)
+) ENGINE = InnoDB COMMENT 'Khuyến mãi áp dụng cho sản phẩm biến thể'
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
 
--- CREATE TABLE `merchant_branches`
--- (
---     `id`          int unsigned NOT NULL AUTO_INCREMENT,
---     `merchant_id` int unsigned NOT NULL,
---     `address`     varchar(255)          DEFAULT NULL COMMENT 'Địa chỉ',
---     `description` TEXT                  DEFAULT NULL,
---     `deleted`     bit          NOT NULL DEFAULT 0,
---     `created_at`  datetime     NOT NULL,
---     `updated_at`  datetime     NOT NULL,
---     PRIMARY KEY (`id`),
---     FOREIGN KEY (`merchant_id`) REFERENCES `merchants` (`id`)
--- ) ENGINE = InnoDB COMMENT 'Quản lý cửa hàng'
---   DEFAULT CHARSET = utf8mb4
---   COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE `permissions`
 (
@@ -213,6 +204,41 @@ CREATE TABLE `address`
 ) ENGINE = InnoDB COMMENT 'Địa chỉ'
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci;
+
+CREATE TABLE `order`
+(
+    `id`                  int unsigned NOT NULL AUTO_INCREMENT,
+    `user_id`             int unsigned NOT NULL COMMENT 'Khóa ngoại tham chiếu đến user',
+    `address_id`          int unsigned NOT NULL COMMENT 'Khóa ngoại tham chiếu đến địa chỉ',
+    `code`                varchar(50)  NOT NULL COMMENT 'Mã người dùng duy nhất',
+    `status`              int          NOT NULL COMMENT 'Trạng thái hoạt động: `0`: Đã thanh toán, 1: Chưa thanh toán',
+    `deleted`             bit          NOT NULL DEFAULT 0 COMMENT 'Đánh dấu trạng thái xóa của bản ghi: `0`: Chưa xóa, `1`: Đã xóa',
+    `created_at`          datetime     NOT NULL,
+    `updated_at`          datetime     NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+    FOREIGN KEY (`address_id`) REFERENCES `address` (`id`)
+) ENGINE = InnoDB COMMENT 'Hóa đơn'
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
+
+CREATE TABLE `order_detail`
+(
+    `id`                  int unsigned NOT NULL AUTO_INCREMENT,
+    `order_id`            int unsigned NOT NULL COMMENT 'Khóa ngoại tham chiếu đến user',
+    `model_id`            int unsigned NOT NULL COMMENT 'Khóa ngoại tham chiếu đến địa chỉ',
+    `amount`              int          NOT NULL COMMENT 'Số lượng',
+    `deleted`             bit          NOT NULL DEFAULT 0 COMMENT 'Đánh dấu trạng thái xóa của bản ghi: `0`: Chưa xóa, `1`: Đã xóa',
+    `created_at`          datetime     NOT NULL,
+    `updated_at`          datetime     NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`order_id`) REFERENCES `order` (`id`),
+    FOREIGN KEY (`model_id`) REFERENCES `model` (`id`)
+) ENGINE = InnoDB COMMENT 'Chi tiết hóa đơn'
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
 
 -- CREATE TABLE `devices`
 -- (
@@ -548,4 +574,8 @@ INSERT INTO users (`id`, `code`, `name`, `phone`, `email`, `password`, `role_id`
 VALUES (1, 'ABCDEFGH', 'Admin', '0365517544', 'admin@gmail.com',
         '$2a$10$fSP7.73InP1cNoVOdqt7P.mb/pzn93gPrKLOixxenooOP3D77hGF.', 1, 1,
         now(), now());
+
+INSERT INTO category (`id`, `name`, `status`, `created_at`, `updated_at`)
+VALUES (1, 'Tóc búi', 1,now(), now()),
+       (2, 'Chun buộc tóc', 1,now(), now());
 
