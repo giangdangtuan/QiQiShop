@@ -2,33 +2,33 @@ package com.app85soft.qiqishop.controller;
 
 import java.util.List;
 
+import com.app85soft.qiqishop.dto.request.IdsRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.app85soft.qiqishop.dto.request.category.AddCategoryReq;
 import com.app85soft.qiqishop.dto.request.category.UpdateCategoryReq;
 import com.app85soft.qiqishop.dto.response.BaseResponse;
 import com.app85soft.qiqishop.dto.response.category.CategoryListRes;
-import com.app85soft.qiqishop.entities.category.Category;
 import com.app85soft.qiqishop.services.category.CategoryService;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/")
 @RequiredArgsConstructor
+@Slf4j
 public class CategoryController {
     private final CategoryService categoryService;
 
     @Operation(summary = "Add new category")
     @PostMapping("v1/category/add")
-    public ResponseEntity<BaseResponse<Category>> addCategory(@RequestBody @Valid AddCategoryReq request) {
-        return ResponseEntity.ok(new BaseResponse<>(categoryService.addCategory(request)));
+    public ResponseEntity<BaseResponse<?>> addCategory(@RequestBody @Valid AddCategoryReq req) {
+        log.info("Add category request: {}", req);
+        return ResponseEntity.ok(new BaseResponse<>(categoryService.addCategory(req)));
     }
 
     @Operation(summary = "Update category")
@@ -37,5 +37,15 @@ public class CategoryController {
         return ResponseEntity.ok(new BaseResponse<>(categoryService.updateCategory(request)));
     }
 
-    
+    @Operation(summary = "Get list category.")
+    @GetMapping("v1/category/list")
+    public ResponseEntity<BaseResponse<List<CategoryListRes>>> getProducts() {
+        return ResponseEntity.ok(categoryService.getCategories());
+    }
+
+    @Operation(summary = "Delete categories.")
+    @PostMapping("v1/category/delete")
+    public ResponseEntity<BaseResponse<List<Integer>>> deleteProducts(@RequestBody @Valid IdsRequest request) {
+        return ResponseEntity.ok(new BaseResponse<>(categoryService.deleteCategory(request)));
+    }
 }

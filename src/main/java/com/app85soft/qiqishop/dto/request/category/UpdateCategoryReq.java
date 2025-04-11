@@ -1,8 +1,5 @@
 package com.app85soft.qiqishop.dto.request.category;
 
-import com.app85soft.qiqishop.dto.constant.ActiveStatus;
-
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -16,5 +13,5 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdateCategoryReq extends AddCategoryReq{
     @NotNull
-    int CategoryId;
+    int id;
 }

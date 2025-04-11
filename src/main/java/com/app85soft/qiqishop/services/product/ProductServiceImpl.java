@@ -7,7 +7,6 @@ import com.app85soft.qiqishop.dto.request.product.AddProductReq;
 import com.app85soft.qiqishop.dto.request.product.UpdateProductReq;
 import com.app85soft.qiqishop.dto.response.BaseResponse;
 import com.app85soft.qiqishop.dto.response.product.ProductRes;
-import com.app85soft.qiqishop.dto.response.user.UserDetailRes;
 import com.app85soft.qiqishop.entities.model.Model;
 import com.app85soft.qiqishop.entities.product.Product;
 import com.app85soft.qiqishop.entities.role.constant.PermissionKey;
@@ -36,6 +35,9 @@ public class ProductServiceImpl extends BaseService implements ProductService {
     @Override
     public ProductRes addProduct(AddProductReq productReq) {
         User user = getUser(PermissionKey.CREATE, PermissionType.PRODUCT);
+        if (productRepository.existsByName(productReq.getName())) {
+            throw new BusinessException(Translator.toLocale("name_already_exists"), HttpStatus.BAD_REQUEST);
+        }
         Product product = new Product();
         product.setCode(generateCode(8,1));
         product.setName(productReq.getName());
@@ -80,6 +82,9 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 
         if (product == null) {
             throw new BusinessException(Translator.toLocale("product_id_not_exist"));
+        }
+        if (productRepository.existsByName(productReq.getName(), product.getId())) {
+            throw new BusinessException(Translator.toLocale("name_already_exists"), HttpStatus.BAD_REQUEST);
         }
         if (productReq.getName() != null && !productReq.getName().isEmpty()) {
             product.setName(productReq.getName());

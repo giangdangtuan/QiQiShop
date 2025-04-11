@@ -1,14 +1,17 @@
 package com.app85soft.qiqishop.dto.request.category;
 
+import com.app85soft.qiqishop.dto.constant.ActiveStatus;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AccessLevel;
-import lombok.Data;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-@Data
-// @AllArgsConstructor
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AddCategoryReq {
     @NotBlank
     String name;
+    ActiveStatus status;
 }

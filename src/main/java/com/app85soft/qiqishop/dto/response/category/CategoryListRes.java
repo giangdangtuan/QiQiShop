@@ -18,4 +18,5 @@ public class CategoryListRes {
     int id;
     String name;
     ActiveStatus status;
+
 }

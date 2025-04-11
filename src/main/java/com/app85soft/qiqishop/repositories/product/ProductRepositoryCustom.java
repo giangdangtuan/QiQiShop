@@ -10,6 +10,8 @@ public interface ProductRepositoryCustom {
 
     boolean existsByCode (String code);
 
+    boolean existsByName(String name, Integer id);
+
     long countProduct(ActiveStatus status, String searchKeyword, Integer categoryId);
 
     List<ProductRes> getProduct(ActiveStatus status, String searchKeyword, Integer categoryId, int page);
@@ -19,6 +21,8 @@ public interface ProductRepositoryCustom {
     Product getProductToUpdate(int id);
 
     List<Integer> getAllIdToCheckExist(List<Integer> productIds);
+
+    List<Integer> getAllIdByCategoryId(List<Integer> categoryId);
 
     void deleteProducts(List<Integer> productIds);
 

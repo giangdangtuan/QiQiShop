@@ -8,7 +8,6 @@ import com.app85soft.qiqishop.entities.product.Product;
 import com.app85soft.qiqishop.entities.product.QProduct;
 import com.app85soft.qiqishop.repositories.BaseRepository;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.group.GroupBy;
 import com.querydsl.core.types.Projections;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +34,20 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
                 .where(builder)
                 .select(qProduct.id)
                 .fetchFirst() != null;
+    }
+
+    @Override
+    public boolean existsByName(String name, Integer id) {
+        BooleanBuilder builder = new BooleanBuilder();
+        builder.and(qProduct.name.eq(name));
+        builder.and(qProduct.id.ne(id));
+        builder.and(qProduct.deleted.eq(false));
+
+        long count = query().from(qProduct)
+                .where(builder)
+                .fetchCount();
+
+        return count > 0;
     }
 
     @Override
@@ -176,6 +189,18 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
     public List<Integer> getAllIdToCheckExist(List<Integer> productIds) {
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(qProduct.id.in(productIds));
+        builder.and(qProduct.deleted.eq(false));
+
+        return query().from(qProduct)
+                .where(builder)
+                .select(qProduct.id)
+                .fetch();
+    }
+
+    @Override
+    public List<Integer> getAllIdByCategoryId(List<Integer> categoryId) {
+        BooleanBuilder builder = new BooleanBuilder();
+        builder.and(qProduct.categoryId.in(categoryId));
         builder.and(qProduct.deleted.eq(false));
 
         return query().from(qProduct)
