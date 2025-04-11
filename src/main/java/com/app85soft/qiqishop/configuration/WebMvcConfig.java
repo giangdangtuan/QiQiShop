@@ -1,15 +1,20 @@
 package com.app85soft.qiqishop.configuration;
 
-import com.app85soft.qiqishop.component.converter.EnumConverterFactory;
-import com.app85soft.qiqishop.security.interceptor.TrackLogRequestInterceptor;
-import com.app85soft.qiqishop.security.interceptor.UserInterceptor;
-import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.MediaType;
-import org.springframework.web.servlet.config.annotation.*;
+import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import com.app85soft.qiqishop.component.converter.EnumConverterFactory;
+import com.app85soft.qiqishop.security.interceptor.TrackLogRequestInterceptor;
+import com.app85soft.qiqishop.security.interceptor.UserInterceptor;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @RequiredArgsConstructor

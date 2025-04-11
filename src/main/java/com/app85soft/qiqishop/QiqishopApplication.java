@@ -9,5 +9,4 @@ public class QiqishopApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(QiqishopApplication.class, args);
 	}
-
 }

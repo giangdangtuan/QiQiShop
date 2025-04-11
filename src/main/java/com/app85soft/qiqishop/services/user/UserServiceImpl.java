@@ -68,7 +68,8 @@ public class UserServiceImpl extends BaseService implements UserService {
             throw new BusinessException(Translator.toLocale("account_not_activated"));
         }
         UserDetailRes userLoginRes = getUserRes(user);
-        userLoginRes.setAccessToken(jwtTokenProvider.generateTokenRs256(String.valueOf(user.getId()), jwtExpirationInMs));
+        userLoginRes
+                .setAccessToken(jwtTokenProvider.generateTokenRs256(String.valueOf(user.getId()), jwtExpirationInMs));
         return userLoginRes;
     }
 
@@ -80,7 +81,8 @@ public class UserServiceImpl extends BaseService implements UserService {
             throw new BusinessException(Translator.toLocale("register_fail"));
         }
         try {
-            if (sessionAuth.getOtp().equals(request.getCode()) && Util.getDuration(new Date(), sessionAuth.getCreatedAt(), TimeUnit.MINUTES) >= OTP_EXPIRY_IN_MINUTES) {
+            if (sessionAuth.getOtp().equals(request.getCode()) && Util.getDuration(new Date(),
+                    sessionAuth.getCreatedAt(), TimeUnit.MINUTES) >= OTP_EXPIRY_IN_MINUTES) {
                 sessionAuth.setStatus(VerifyStatus.EXPIRED);
                 throw new BusinessException(Translator.toLocale("otp_expired"));
             }
@@ -136,7 +138,8 @@ public class UserServiceImpl extends BaseService implements UserService {
         userRepository.save(user);
 
         UserDetailRes userLoginRes = getUserRes(user);
-        userLoginRes.setAccessToken(jwtTokenProvider.generateTokenRs256(String.valueOf(user.getId()), jwtExpirationInMs));
+        userLoginRes
+                .setAccessToken(jwtTokenProvider.generateTokenRs256(String.valueOf(user.getId()), jwtExpirationInMs));
         return userLoginRes;
 
     }
@@ -252,7 +255,8 @@ public class UserServiceImpl extends BaseService implements UserService {
             throw new BusinessException(Translator.toLocale("password_unchanged"));
         }
         try {
-            if (sessionAuth.getOtp().equals(request.getCode()) && Util.getDuration(new Date(), sessionAuth.getCreatedAt(), TimeUnit.MINUTES) >= OTP_EXPIRY_IN_MINUTES) {
+            if (sessionAuth.getOtp().equals(request.getCode()) && Util.getDuration(new Date(),
+                    sessionAuth.getCreatedAt(), TimeUnit.MINUTES) >= OTP_EXPIRY_IN_MINUTES) {
                 sessionAuth.setStatus(VerifyStatus.EXPIRED);
                 throw new BusinessException(Translator.toLocale("otp_expired"));
             }
