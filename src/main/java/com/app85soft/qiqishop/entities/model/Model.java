@@ -22,9 +22,6 @@ public class Model extends BaseEntity {
     String name;
     Integer productId;
     Integer coverImage;
-
-    boolean hasDiscount;
-    int discountPercentage;
     BigDecimal price;
     int stock;
     int soldCount;

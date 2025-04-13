@@ -41,8 +41,7 @@ public class ModelRepositoryImpl extends BaseRepository implements ModelReposito
                 .where(builder)
                 .select(Projections.fields(ModelRes.class,
                         qModel.code, qModel.name, qModel.productId,
-                        qModel.coverImage, qModel.hasDiscount,
-                        qModel.discountPercentage, qModel.price,
+                        qModel.coverImage, qModel.price,
                         qModel.stock, qModel.soldCount))
                 .fetch();
     }

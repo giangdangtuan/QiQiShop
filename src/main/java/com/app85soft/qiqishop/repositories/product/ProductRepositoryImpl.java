@@ -6,22 +6,27 @@ import com.app85soft.qiqishop.dto.response.product.ProductRes;
 import com.app85soft.qiqishop.entities.model.QModel;
 import com.app85soft.qiqishop.entities.product.Product;
 import com.app85soft.qiqishop.entities.product.QProduct;
+import com.app85soft.qiqishop.entities.promotion.QPromotion;
+import com.app85soft.qiqishop.entities.promotion.QPromotionModel;
 import com.app85soft.qiqishop.repositories.BaseRepository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.app85soft.qiqishop.util.Constants.PAGE_SIZE;
 
+@Slf4j
 public class ProductRepositoryImpl extends BaseRepository implements ProductRepositoryCustom {
     private final QProduct qProduct = QProduct.product;
     private final QModel qModel = QModel.model;
+    private final QPromotion qPromotion = QPromotion.promotion;
+    private final QPromotionModel qPromotionModel = QPromotionModel.promotionModel;
 
     @Override
     public boolean existsByCode(String code) {
@@ -109,29 +114,17 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
                 .map(ProductRes::getId)
                 .collect(Collectors.toList());
 
-        List<ModelRes> models = query().from(qModel)
-                .where(qModel.productId.in(productIds)
-                        .and(qModel.deleted.eq(false)))
-                .select(Projections.fields(ModelRes.class,
-                        qModel.code,
-                        qModel.productId,
-                        qModel.name,
-                        qModel.coverImage,
-                        qModel.hasDiscount,
-                        qModel.discountPercentage,
-                        qModel.price,
-                        qModel.stock,
-                        qModel.soldCount
-                ))
-                .fetch();
-
-        Map<Integer, List<ModelRes>> modelMap = models.stream()
-                .collect(Collectors.groupingBy(ModelRes::getProductId));
+        Map<Integer, List<ModelRes>> modelMap = new HashMap<>();
+        for (int productId : productIds) {
+            List<ModelRes> models = getModelsWithPromotion(productId);
+            modelMap.put(productId, models);
+        }
 
         products.forEach(product -> product.setModels(modelMap.getOrDefault(product.getId(), new ArrayList<>())));
 
         return products;
     }
+
 
 
     @Override
@@ -153,25 +146,93 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
             return null;
         }
 
+        List<ModelRes> models = getModelsWithPromotion(productId);
+        product.setModels(models);
+
+        return product;
+    }
+
+
+    @Override
+    public List<ProductRes> getProductSale(ActiveStatus status, String searchKeyword, Integer categoryId, int page) {
+        BooleanBuilder builder = new BooleanBuilder();
+        if (status != null) builder.and(qProduct.status.eq(status));
+        builder.and(qProduct.deleted.eq(false));
+        if (searchKeyword != null) builder.and(qProduct.name.contains(searchKeyword));
+        if (categoryId != null) builder.and(qProduct.categoryId.eq(categoryId));
+
+        List<ProductRes> products = query().from(qProduct)
+                .where(builder)
+                .orderBy(qProduct.id.desc())
+                .offset(page * PAGE_SIZE)
+                .limit(PAGE_SIZE)
+                .select(Projections.fields(ProductRes.class,
+                        qProduct.id,
+                        qProduct.code,
+                        qProduct.name,
+                        qProduct.categoryId,
+                        qProduct.coverImage,
+                        qProduct.description,
+                        qProduct.status
+                ))
+                .fetch();
+
+        if (products.isEmpty()) return Collections.emptyList();
+
+        List<Integer> productIds = products.stream()
+                .map(ProductRes::getId)
+                .collect(Collectors.toList());
+
+        long now = System.currentTimeMillis();
+
+        BooleanExpression promotionCondition = qPromotionModel.id.isNotNull()
+                .and(qPromotion.startTime.loe(now))
+                .and(qPromotion.endTime.goe(now));
+
         List<ModelRes> models = query().from(qModel)
-                .where(qModel.productId.eq(productId)
-                        .and(qModel.deleted.eq(false)))
+                .leftJoin(qPromotionModel).on(qPromotionModel.modelId.eq(qModel.id)
+                        .and(qPromotionModel.status.eq(ActiveStatus.ACTIVE)))
+                .leftJoin(qPromotion).on(qPromotion.id.eq(qPromotionModel.promotionId)
+                        .and(qPromotion.status.eq(ActiveStatus.ACTIVE)))
+                .where(qModel.productId.in(productIds).and(qModel.deleted.eq(false))
+                        .and(qPromotion.startTime.loe(now))
+                        .and(qPromotion.endTime.goe(now)))
                 .select(Projections.fields(ModelRes.class,
                         qModel.code,
                         qModel.productId,
                         qModel.name,
                         qModel.coverImage,
-                        qModel.hasDiscount,
-                        qModel.discountPercentage,
-                        qModel.price,
+                        qModel.price.as("originalPrice"),
+                        Expressions.cases()
+                                .when(promotionCondition)
+                                .then(qModel.price.subtract(
+                                        qModel.price.multiply(qPromotionModel.discountPercentage.doubleValue()).divide(100)
+                                ))
+                                .otherwise(qModel.price).as("finalPrice"),
                         qModel.stock,
-                        qModel.soldCount
+                        qModel.soldCount,
+                        Projections.fields(ModelRes.PromotionInfo.class,
+                                qPromotion.id.as("id"),
+                                qPromotion.name.as("name"),
+                                qPromotion.startTime.as("startTime"),
+                                qPromotion.endTime.as("endTime"),
+                                Expressions.cases()
+                                        .when(promotionCondition)
+                                        .then(qPromotionModel.discountPercentage)
+                                        .otherwise(0)
+                                        .as("discountPercentage")
+                        ).as("promotion")
                 ))
                 .fetch();
 
-        product.setModels(models);
-        return product;
+        Map<Integer, List<ModelRes>> modelMap = models.stream()
+                .collect(Collectors.groupingBy(ModelRes::getProductId));
+
+        products.forEach(product -> product.setModels(modelMap.getOrDefault(product.getId(), new ArrayList<>())));
+
+        return products;
     }
+
 
 
     @Override
@@ -230,4 +291,61 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
                 .where(modelBuilder)
                 .execute();
     }
+
+    private List<ModelRes> getModelsWithPromotion(int productId) {
+        long now = System.currentTimeMillis();
+
+        BooleanExpression promotionCondition = qPromotionModel.id.isNotNull()
+                .and(qPromotion.startTime.loe(now))
+                .and(qPromotion.endTime.goe(now));
+
+        List<ModelRes> models = query().from(qModel)
+                .leftJoin(qPromotionModel).on(qPromotionModel.modelId.eq(qModel.id)
+                        .and(qPromotionModel.status.eq(ActiveStatus.ACTIVE)))
+                .leftJoin(qPromotion).on(qPromotion.id.eq(qPromotionModel.promotionId)
+                        .and(qPromotion.status.eq(ActiveStatus.ACTIVE))
+                        .and(qPromotion.startTime.loe(now))
+                        .and(qPromotion.endTime.goe(now)))
+                .where(qModel.productId.eq(productId)
+                        .and(qModel.deleted.eq(false)))
+                .select(Projections.fields(ModelRes.class,
+                        qModel.code,
+                        qModel.productId,
+                        qModel.name,
+                        qModel.coverImage,
+                        qModel.price.as("originalPrice"),
+                        Expressions.cases()
+                                .when(promotionCondition)
+                                .then(qModel.price.subtract(
+                                        qModel.price.multiply(qPromotionModel.discountPercentage.doubleValue()).divide(100)
+                                ))
+                                .otherwise(qModel.price).as("finalPrice"),
+                        qModel.stock,
+                        qModel.soldCount,
+                        Projections.fields(ModelRes.PromotionInfo.class,
+                                qPromotion.id.as("id"),
+                                qPromotion.name.as("name"),
+                                qPromotion.startTime.as("startTime"),
+                                qPromotion.endTime.as("endTime"),
+                                Expressions.cases()
+                                        .when(promotionCondition)
+                                        .then(qPromotionModel.discountPercentage)
+                                        .otherwise(0)
+                                        .as("discountPercentage")
+                        ).as("promotion")
+                ))
+                .fetch();
+
+        Map<String, ModelRes> uniqueModels = new HashMap<>();
+        models.forEach(model -> {
+            String code = model.getCode();
+            ModelRes existing = uniqueModels.get(code);
+            if (existing == null || (model.getPromotion() != null)) {
+                uniqueModels.put(code, model);
+            }
+        });
+
+        return new ArrayList<>(uniqueModels.values());
+    }
+
 }

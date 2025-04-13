@@ -15,20 +15,23 @@ public class ModelRes {
     Integer productId;
     String name;
     Integer coverImage;
-    boolean hasDiscount;
-    int discountPercentage;
-    BigDecimal price;
+    BigDecimal originalPrice;
+    BigDecimal finalPrice;
     int stock;
     int soldCount;
 
-    public ModelRes(String code, String name, Integer productId, Integer coverImage, boolean hasDiscount, int discountPercentage, BigDecimal price, int stock) {
-        this.code = code;
-        this.name = name;
-        this.productId = productId;
-        this.coverImage = coverImage;
-        this.hasDiscount = hasDiscount;
-        this.discountPercentage = discountPercentage;
-        this.price = price;
-        this.stock = stock;
+    PromotionInfo promotion;
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class PromotionInfo {
+        Integer id;
+        String name;
+        Long startTime;
+        Long endTime;
+        int discountPercentage;
     }
 }

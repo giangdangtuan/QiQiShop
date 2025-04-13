@@ -70,7 +70,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
         }
         modelRepository.saveAll(models);
 
-        ProductRes productRes = getProductRes(product, models);
+        ProductRes productRes = getProductRes(product);
 
         return productRes;
     }
@@ -163,7 +163,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
             }
         }
         modelRepository.saveAll(updatedModels);
-        ProductRes productRes = getProductRes(product, updatedModels);
+        ProductRes productRes = getProductRes(product);
 
         return productRes;
     }
@@ -200,7 +200,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
         return new BaseResponse<>(productRes);
     }
 
-    private ProductRes getProductRes(Product product, List<Model> models) {
+    private ProductRes getProductRes(Product product) {
 
         return ProductRes.builder()
                 .id(product.getId())

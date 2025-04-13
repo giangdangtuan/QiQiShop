@@ -16,6 +16,8 @@ public interface ProductRepositoryCustom {
 
     List<ProductRes> getProduct(ActiveStatus status, String searchKeyword, Integer categoryId, int page);
 
+    List<ProductRes> getProductSale(ActiveStatus status, String searchKeyword, Integer categoryId, int page);
+
     ProductRes getProductDetail(int productId);
 
     Product getProductToUpdate(int id);
