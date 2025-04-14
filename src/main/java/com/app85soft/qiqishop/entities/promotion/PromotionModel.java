@@ -17,13 +17,13 @@ import lombok.experimental.FieldDefaults;
 @Table(name = "promotion_model")
 public class PromotionModel extends BaseEntity {
     @Column(name = "promotion_id")
-    private int promotionId;
+    int promotionId;
 
     @Column(name = "model_id")
-    private int modelId;
+    int modelId;
 
     @Column(name = "discount_percentage")
-    private int discountPercentage;
+    int discountPercentage;
 
     @Column(name = "status", columnDefinition = "INT")
     ActiveStatus status;

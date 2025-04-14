@@ -9,6 +9,7 @@ import com.app85soft.qiqishop.entities.promotion.QPromotionModel;
 import com.app85soft.qiqishop.repositories.BaseRepository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -162,6 +163,7 @@ public class PromotionRepositoryImpl extends BaseRepository implements Promotion
     }
 
     @Override
+    @Transactional
     public void deletePromotions(List<Integer> promotionIds) {
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(qPromotion.id.in(promotionIds));

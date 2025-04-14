@@ -105,7 +105,6 @@ CREATE TABLE `promotion_model`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci;
 
-
 CREATE TABLE `permissions`
 (
     `id`                int unsigned NOT NULL AUTO_INCREMENT,
@@ -185,6 +184,35 @@ CREATE TABLE `users`
     FOREIGN KEY (`avatar_id`) REFERENCES `upload_files` (`id`),
     FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`)
 ) ENGINE = InnoDB COMMENT ='Quan ly tai khoan nguoi dung truy cap dich vu'
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
+CREATE TABLE `cart`
+(
+    `id`                  int unsigned NOT NULL AUTO_INCREMENT,
+    `user_id`             int unsigned NOT NULL COMMENT 'Khóa ngoại tham chiếu đến người dùng',
+    `deleted`             bit          NOT NULL DEFAULT 0 COMMENT 'Đánh dấu trạng thái xóa của bản ghi: `0`: Chưa xóa, `1`: Đã xóa',
+    `created_at`          datetime     NOT NULL,
+    `updated_at`          datetime     NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE = InnoDB COMMENT 'Giỏ hàng'
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
+CREATE TABLE `cart_item`
+(
+    `id`                  int unsigned    NOT NULL AUTO_INCREMENT,
+    `cart_id`             int unsigned    NOT NULL COMMENT 'Khóa ngoại tham chiếu đến giỏ hàng',
+    `model_id`            int unsigned    NOT NULL COMMENT 'Khóa ngoại tham chiếu đến sản phẩm biến thể',
+    `quantity`            int             NOT NULL COMMENT 'Số lượng',
+    `deleted`             bit             NOT NULL DEFAULT 0 COMMENT 'Đánh dấu trạng thái xóa của bản ghi: `0`: Chưa xóa, `1`: Đã xóa',
+    `created_at`          datetime        NOT NULL,
+    `updated_at`          datetime        NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`cart_id`) REFERENCES `cart` (`id`),
+    FOREIGN KEY (`model_id`) REFERENCES `model` (`id`)
+) ENGINE = InnoDB COMMENT 'Khuyến mãi áp dụng cho sản phẩm biến thể'
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci;
 
@@ -301,7 +329,7 @@ CREATE TABLE `transactions`
     PRIMARY KEY (`id`),
     UNIQUE KEY (`code`),
     UNIQUE KEY (`reference_code`, `payment_gateway`),
-            FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci;

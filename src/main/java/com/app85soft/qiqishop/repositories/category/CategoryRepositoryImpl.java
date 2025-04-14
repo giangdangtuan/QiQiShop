@@ -2,9 +2,6 @@ package com.app85soft.qiqishop.repositories.category;
 
 import java.util.List;
 
-import com.app85soft.qiqishop.component.Translator;
-import com.app85soft.qiqishop.exceptions.BusinessException;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
 import com.app85soft.qiqishop.dto.response.category.CategoryListRes;

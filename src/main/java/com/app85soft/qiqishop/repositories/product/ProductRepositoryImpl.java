@@ -198,6 +198,7 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
                         .and(qPromotion.startTime.loe(now))
                         .and(qPromotion.endTime.goe(now)))
                 .select(Projections.fields(ModelRes.class,
+                        qModel.id,
                         qModel.code,
                         qModel.productId,
                         qModel.name,

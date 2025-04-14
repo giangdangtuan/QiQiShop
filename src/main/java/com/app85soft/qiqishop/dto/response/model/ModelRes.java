@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ModelRes {
+    int id;
     String code;
     Integer productId;
     String name;

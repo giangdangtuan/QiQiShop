@@ -11,8 +11,8 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PromotionModelRes {
     int id;
-    private int promotionId;
-    private int modelId;
-    private int discountPercentage;
+    int promotionId;
+    int modelId;
+    int discountPercentage;
     ActiveStatus status;
 }
