@@ -68,9 +68,9 @@ public class CategoryRepositoryImpl extends BaseRepository implements CategoryRe
 
     @Override
     @Transactional
-    public void deleteCategories(List<Integer> categorycategoryIds) {
+    public void deleteCategories(List<Integer> categoryIds) {
         BooleanBuilder builder = new BooleanBuilder();
-        builder.and(qCategory.id.in(categorycategoryIds));
+        builder.and(qCategory.id.in(categoryIds));
         builder.and(qCategory.deleted.eq(false));
 
         query().update(qCategory)

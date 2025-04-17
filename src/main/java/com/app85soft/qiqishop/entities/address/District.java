@@ -2,9 +2,11 @@ package com.app85soft.qiqishop.entities.address;
 
 import com.app85soft.qiqishop.entities.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import jakarta.persistence.*;
 
 @Entity
 @Getter
@@ -13,23 +15,12 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Table(name = "address")
-public class Address extends BaseEntity {
-    Integer userId;
-    String consignee;
-    String phone;
+@Table(name = "district")
+public class District extends BaseEntity {
+    int ghnId;
+    String code;
+    String name;
 
     @Column(name = "province_id")
     int provinceId;
-    @Column(name = "district_id")
-    int districtId;
-    @Column(name = "ward_id")
-    int wardId;
-    @Column(name = "detail_address")
-    String detailAddress;
-
-    @Column(name = "is_default")
-    boolean isDefault;
-
-    boolean deleted;
 }

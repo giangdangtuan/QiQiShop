@@ -6,7 +6,6 @@ import com.app85soft.qiqishop.dto.request.product.AddProductReq;
 import com.app85soft.qiqishop.dto.request.product.UpdateProductReq;
 import com.app85soft.qiqishop.dto.response.BaseResponse;
 import com.app85soft.qiqishop.dto.response.product.ProductRes;
-import com.app85soft.qiqishop.dto.response.user.UserDetailRes;
 import com.app85soft.qiqishop.services.product.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -29,9 +28,9 @@ public class ProductController {
     public ResponseEntity<BaseResponse<List<ProductRes>>> getProducts(@RequestParam int page,
                                                                       @RequestParam(required = false) ActiveStatus status,
                                                                       @Parameter(description = "[name]")
-                                                                          @RequestParam(required = false) String searchKeyword,
+                                                                      @RequestParam(required = false) String searchKeyword,
                                                                       @Parameter(description = "[category]")
-                                                                          @RequestParam(required = false) Integer catgoryId) {
+                                                                      @RequestParam(required = false) Integer catgoryId) {
         return ResponseEntity.ok(productService.getProducts(status, searchKeyword, catgoryId, page));
     }
 

@@ -59,6 +59,8 @@ public class CartRepositoryImpl  extends BaseRepository implements CartRepositor
                         qModel.name.as("modelName"),
                         qModel.coverImage.as("cover_image"),
                         qCartItem.quantity,
+                        qModel.stock.as("stock"),
+                        qProduct.weight.as("weight"),
                         qModel.price.as("originalPrice"),
                         Expressions.cases()
                                 .when(promotionCondition)
@@ -86,12 +88,15 @@ public class CartRepositoryImpl  extends BaseRepository implements CartRepositor
     }
 
     @Override
-    public List<Integer> getAllCartIteamIdToCheckExist(List<Integer> cartIteamIds) {
+    public List<Integer> getAllCartIteamIdToCheckExist(List<Integer> cartIteamIds, int userId) {
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(qCartItem.id.in(cartIteamIds));
         builder.and(qCartItem.deleted.eq(false));
+        builder.and(qCartItem.cartId.eq(qCart.id));
+        builder.and(qCart.userId.eq(userId));
 
         return query().from(qCartItem)
+                .join(qCart).on(qCartItem.cartId.eq(qCart.id))
                 .where(builder)
                 .select(qCartItem.id)
                 .fetch();

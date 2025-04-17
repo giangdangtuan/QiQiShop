@@ -30,6 +30,8 @@ public class CartRes {
         String modelName;
         Integer cover_image;
         int quantity;
+        int stock;
+        int weight;
         BigDecimal originalPrice;
         BigDecimal finalPrice;
         BigDecimal totalAmount;

@@ -13,23 +13,11 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Table(name = "address")
-public class Address extends BaseEntity {
-    Integer userId;
-    String consignee;
-    String phone;
+@Table(name = "ward")
+public class Ward extends BaseEntity {
+    String code;
+    String name;
 
-    @Column(name = "province_id")
-    int provinceId;
     @Column(name = "district_id")
     int districtId;
-    @Column(name = "ward_id")
-    int wardId;
-    @Column(name = "detail_address")
-    String detailAddress;
-
-    @Column(name = "is_default")
-    boolean isDefault;
-
-    boolean deleted;
 }

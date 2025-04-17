@@ -40,6 +40,7 @@ CREATE TABLE `product`
     `code`                   varchar(50)  NOT NULL COMMENT 'Mã sản phẩm duy nhất',
     `name`                   varchar(255) NOT NULL,
     `description`            TEXT                  DEFAULT NULL,
+    `weight`                 int unsigned NOT NULL COMMENT 'Cân nặng sản phẩm tính theo gam',
     `status`                 int          NOT NULL COMMENT 'Trạng thái hoạt động: `0`: Không hoạt động, 1: Hoạt động',
     `deleted`                bit          NOT NULL DEFAULT 0 COMMENT 'Đánh dấu trạng thái xóa của bản ghi: `0`: Chưa xóa, `1`: Đã xóa',
     `created_at`             datetime     NOT NULL,
@@ -216,19 +217,70 @@ CREATE TABLE `cart_item`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci;
 
+CREATE TABLE `province`
+(
+    `id`                  int unsigned    NOT NULL AUTO_INCREMENT,
+    `ghn_id`              int unsigned,
+    `name`                varchar(255)             DEFAULT NULL,
+    `code`                varchar(255)    NOT NULL,
+    `deleted`             bit             NOT NULL DEFAULT 0 COMMENT 'Đánh dấu trạng thái xóa của bản ghi: `0`: Chưa xóa, `1`: Đã xóa',
+    `created_at`          datetime        NOT NULL,
+    `updated_at`          datetime        NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB COMMENT 'Tỉnh, thành phố'
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
+CREATE TABLE `district`
+(
+    `id`                  int unsigned    NOT NULL AUTO_INCREMENT,
+    `ghn_id`              int unsigned,
+    `name`                varchar(255)             DEFAULT NULL,
+    `code`                varchar(255)             DEFAULT NULL,
+    `province_id`         int unsigned    NOT NULL,
+    `deleted`             bit             NOT NULL DEFAULT 0 COMMENT 'Đánh dấu trạng thái xóa của bản ghi: `0`: Chưa xóa, `1`: Đã xóa',
+    `created_at`          datetime        NOT NULL,
+    `updated_at`          datetime        NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`province_id`) REFERENCES `province` (`id`)
+) ENGINE = InnoDB COMMENT 'Quận, huyện'
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
+CREATE TABLE `ward`
+(
+    `id`                  int unsigned    NOT NULL AUTO_INCREMENT,
+    `name`                varchar(255)             DEFAULT NULL,
+    `code`                varchar(255)    NOT NULL,
+    `district_id`         int unsigned    NOT NULL,
+    `deleted`             bit             NOT NULL DEFAULT 0 COMMENT 'Đánh dấu trạng thái xóa của bản ghi: `0`: Chưa xóa, `1`: Đã xóa',
+    `created_at`          datetime        NOT NULL,
+    `updated_at`          datetime        NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`district_id`) REFERENCES `district` (`id`)
+) ENGINE = InnoDB COMMENT 'Phường, xã'
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
 CREATE TABLE `address`
 (
     `id`                     int unsigned    NOT NULL AUTO_INCREMENT,
     `user_id`                int unsigned    NOT NULL COMMENT 'Khóa ngoại tham chiếu đến người dùng',
     `consignee`              varchar(255)    NOT NULL,
     `phone`                  varchar(20)     NOT NULL,
-    `address`                varchar(255)             DEFAULT NULL,
-    `type`                   bit             NOT NULL DEFAULT 0 COMMENT 'Loại địa chỉ: `0`: Địa chỉ thường, `1`: Địa chỉ mặc định',
+    `province_id`            int unsigned    NOT NULL,
+    `district_id`            int unsigned    NOT NULL,
+    `ward_id`                int unsigned    NOT NULL,
+    `detail_address`         TEXT                     DEFAULT NULL,
+    `is_default`             bit             NOT NULL DEFAULT 0 COMMENT 'Loại địa chỉ: `0`: Địa chỉ thường, `1`: Địa chỉ mặc định',
     `deleted`                bit             NOT NULL DEFAULT 0 COMMENT 'Đánh dấu trạng thái xóa của bản ghi: `0`: Chưa xóa, `1`: Đã xóa',
     `created_at`             datetime        NOT NULL,
     `updated_at`             datetime        NOT NULL,
     PRIMARY KEY (`id`),
-    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+    FOREIGN KEY (`province_id`) REFERENCES `province` (`id`),
+    FOREIGN KEY (`district_id`) REFERENCES `district` (`id`),
+    FOREIGN KEY (`ward_id`) REFERENCES `ward` (`id`)
 ) ENGINE = InnoDB COMMENT 'Địa chỉ'
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci;

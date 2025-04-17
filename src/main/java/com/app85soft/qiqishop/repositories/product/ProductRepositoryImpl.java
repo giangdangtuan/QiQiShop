@@ -101,6 +101,7 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
                         qProduct.name,
                         qProduct.categoryId,
                         qProduct.coverImage,
+                        qProduct.weight,
                         qProduct.description,
                         qProduct.status
                 ))
@@ -137,6 +138,7 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
                         qProduct.name,
                         qProduct.categoryId,
                         qProduct.coverImage,
+                        qProduct.weight,
                         qProduct.description,
                         qProduct.status
                 ))
@@ -172,6 +174,7 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
                         qProduct.name,
                         qProduct.categoryId,
                         qProduct.coverImage,
+                        qProduct.weight,
                         qProduct.description,
                         qProduct.status
                 ))

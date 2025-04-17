@@ -27,25 +27,24 @@ public class CategoryController {
     @Operation(summary = "Add new category")
     @PostMapping("v1/category/add")
     public ResponseEntity<BaseResponse<?>> addCategory(@RequestBody @Valid AddCategoryReq req) {
-        log.info("Add category request: {}", req);
         return ResponseEntity.ok(new BaseResponse<>(categoryService.addCategory(req)));
     }
 
     @Operation(summary = "Update category")
     @PostMapping("v1/category/update")
-    public ResponseEntity<BaseResponse<List<CategoryListRes> >> updateCategory(@RequestBody @Valid UpdateCategoryReq request) {
+    public ResponseEntity<BaseResponse<List<CategoryListRes>>> updateCategory(@RequestBody @Valid UpdateCategoryReq request) {
         return ResponseEntity.ok(new BaseResponse<>(categoryService.updateCategory(request)));
     }
 
     @Operation(summary = "Get list category.")
     @GetMapping("v1/category/list")
-    public ResponseEntity<BaseResponse<List<CategoryListRes>>> getProducts() {
+    public ResponseEntity<BaseResponse<List<CategoryListRes>>> getCategories() {
         return ResponseEntity.ok(categoryService.getCategories());
     }
 
     @Operation(summary = "Delete categories.")
     @PostMapping("v1/category/delete")
-    public ResponseEntity<BaseResponse<List<Integer>>> deleteProducts(@RequestBody @Valid IdsRequest request) {
+    public ResponseEntity<BaseResponse<List<Integer>>> deleteCategories(@RequestBody @Valid IdsRequest request) {
         return ResponseEntity.ok(new BaseResponse<>(categoryService.deleteCategory(request)));
     }
 }

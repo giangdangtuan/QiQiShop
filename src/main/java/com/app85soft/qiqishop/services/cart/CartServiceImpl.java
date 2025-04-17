@@ -3,15 +3,20 @@ package com.app85soft.qiqishop.services.cart;
 import com.app85soft.qiqishop.component.Translator;
 import com.app85soft.qiqishop.dto.request.IdsRequest;
 import com.app85soft.qiqishop.dto.request.cart.AddToCartReq;
+import com.app85soft.qiqishop.dto.request.cart.CheckOutReq;
 import com.app85soft.qiqishop.dto.request.cart.UpdateCartReq;
 import com.app85soft.qiqishop.dto.response.BaseResponse;
+import com.app85soft.qiqishop.dto.response.address.AddressRes;
 import com.app85soft.qiqishop.dto.response.cart.AddToCartRes;
 import com.app85soft.qiqishop.dto.response.cart.CartRes;
+import com.app85soft.qiqishop.dto.response.cart.CheckOutRes;
 import com.app85soft.qiqishop.entities.cart.Cart;
 import com.app85soft.qiqishop.entities.cart.CartItem;
 import com.app85soft.qiqishop.entities.model.Model;
 import com.app85soft.qiqishop.entities.user.User;
 import com.app85soft.qiqishop.exceptions.BusinessException;
+import com.app85soft.qiqishop.external.GhnClient;
+import com.app85soft.qiqishop.repositories.address.AddressRepository;
 import com.app85soft.qiqishop.repositories.cart.CartRepository;
 import com.app85soft.qiqishop.repositories.cart_item.CartItemRepository;
 import com.app85soft.qiqishop.repositories.model.ModelRepository;
@@ -20,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -32,6 +37,8 @@ public class CartServiceImpl extends BaseService implements CartService {
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final ModelRepository modelRepository;
+    private final AddressRepository addressRepository;
+    private final GhnClient ghnClient;
 
     @Override
     public AddToCartRes addToCart(AddToCartReq addToCartReq) {
@@ -103,7 +110,7 @@ public class CartServiceImpl extends BaseService implements CartService {
     public BaseResponse<CartRes> deleteCartItem(IdsRequest req) {
         User user = getUser();
         List<Integer> CartItemIds = req.getIds();
-        List<Integer> existingIds = cartRepository.getAllCartIteamIdToCheckExist(CartItemIds);
+        List<Integer> existingIds = cartRepository.getAllCartIteamIdToCheckExist(CartItemIds, user.getId());
         List<Integer> nonExistingIds = CartItemIds.stream().filter(id -> !existingIds.contains(id)).toList();
         if (!nonExistingIds.isEmpty()) {
             throw new BusinessException(Translator.toLocale("id_not_exist"), HttpStatus.BAD_REQUEST);
@@ -120,5 +127,46 @@ public class CartServiceImpl extends BaseService implements CartService {
         CartRes cartRes = cartRepository.getCartByUserId(user.getId());
 
         return new BaseResponse<>(cartRes);
+    }
+
+    @Override
+    public BaseResponse<CheckOutRes> checkOut(CheckOutReq req) {
+        User user = getUser();
+
+        AddressRes address;
+        if (req.getAddressId() != null) {
+            address = addressRepository.getAddress(req.getAddressId(), user.getId());
+        } else {
+            address = addressRepository.getDefaultAddress(user.getId());
+        }
+
+        List<CartRes.CartItemRes> items = cartItemRepository.getListCartIteam(req.getSelectCartItemId(), user.getId());
+        if (items == null || items.isEmpty()) {
+            throw new BusinessException(Translator.toLocale("out_of_stock"));
+        }
+        BigDecimal totalAmount = items.stream()
+                .map(CartRes.CartItemRes::getTotalAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        int totalWeight = items.stream()
+                .mapToInt(item -> item.getWeight() * item.getQuantity())
+                .sum();
+
+        Map<String, Object> feeRequest = Map.of(
+                "service_type_id", 2, // Dịch vụ GHN mặc định
+                "to_district_id", address.getDistrictGhnId(),
+                "to_ward_code", address.getWardGhnCode(),
+                "weight", totalWeight
+        );
+
+        BigDecimal shippingFee = BigDecimal.valueOf(ghnClient.calculateShippingFee(feeRequest));
+        CheckOutRes res = CheckOutRes.builder()
+                .items(items)
+                .address(address)
+                .merchandiseTotal(totalAmount)
+                .shippingCost(shippingFee)
+                .totalAmount(totalAmount.add(shippingFee))
+                .build();
+        return new BaseResponse<>(res);
     }
 }

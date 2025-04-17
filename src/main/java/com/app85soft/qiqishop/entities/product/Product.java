@@ -23,6 +23,7 @@ public class Product extends BaseEntity {
 
     @Column(columnDefinition = "TEXT")
     String description;
+    Integer weight;
 
     @Column(name = "status", columnDefinition = "INT")
     ActiveStatus status;

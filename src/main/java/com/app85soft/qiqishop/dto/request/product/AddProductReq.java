@@ -21,6 +21,7 @@ public class AddProductReq {
     @NotNull
     Integer categoryId;
     Integer coverImage;
+    Integer weight;
     @NotBlank
     String description;
     BigDecimal price;

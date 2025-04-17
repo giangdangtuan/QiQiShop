@@ -44,6 +44,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
         product.setCategoryId(productReq.getCategoryId());
         product.setCoverImage(productReq.getCoverImage());
         product.setDescription(productReq.getDescription());
+        product.setWeight(productReq.getWeight());
         product.setStatus(ActiveStatus.ACTIVE);
         productRepository.save(product);
 
@@ -94,6 +95,9 @@ public class ProductServiceImpl extends BaseService implements ProductService {
         }
         if (productReq.getCoverImage() != null) {
             product.setCoverImage(productReq.getCoverImage());
+        }
+        if (productReq.getWeight() != null) {
+            product.setWeight(productReq.getWeight());
         }
         if (productReq.getDescription() != null && !productReq.getDescription().isEmpty()) {
             product.setDescription(productReq.getDescription());
@@ -208,6 +212,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
                 .name(product.getName())
                 .categoryId(product.getCategoryId())
                 .coverImage(product.getCoverImage())
+                .weight(product.getWeight())
                 .description(product.getDescription())
                 .status(product.getStatus())
                 .models(modelRepository.getModels(product.getId()))

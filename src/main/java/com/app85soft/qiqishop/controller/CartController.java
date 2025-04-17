@@ -2,12 +2,11 @@ package com.app85soft.qiqishop.controller;
 
 import com.app85soft.qiqishop.dto.request.IdsRequest;
 import com.app85soft.qiqishop.dto.request.cart.AddToCartReq;
+import com.app85soft.qiqishop.dto.request.cart.CheckOutReq;
 import com.app85soft.qiqishop.dto.request.cart.UpdateCartReq;
-import com.app85soft.qiqishop.dto.request.product.UpdateProductReq;
-import com.app85soft.qiqishop.dto.request.promotion.AddPromotionReq;
 import com.app85soft.qiqishop.dto.response.BaseResponse;
 import com.app85soft.qiqishop.dto.response.cart.CartRes;
-import com.app85soft.qiqishop.dto.response.promotion.PromotionRes;
+import com.app85soft.qiqishop.dto.response.cart.CheckOutRes;
 import com.app85soft.qiqishop.services.cart.CartService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -45,5 +44,11 @@ public class CartController {
     @GetMapping("v1/cart/detail")
     public ResponseEntity<BaseResponse<CartRes>> getCartDetail() {
         return ResponseEntity.ok(cartService.getCart());
+    }
+
+    @Operation(summary = "Check Out")
+    @PostMapping("v1/checkout")
+    public ResponseEntity<BaseResponse<CheckOutRes>> checkOut(@RequestBody CheckOutReq req) {
+        return ResponseEntity.ok(cartService.checkOut(req));
     }
 }

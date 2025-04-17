@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface CartRepositoryCustom {
     CartRes getCartByUserId(int userId);
-    List<Integer> getAllCartIteamIdToCheckExist(List<Integer> cartIteamIds);
+    List<Integer> getAllCartIteamIdToCheckExist(List<Integer> cartIteamIds, int userId);
 
 }
