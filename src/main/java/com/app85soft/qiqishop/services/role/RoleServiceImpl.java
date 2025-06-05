@@ -21,6 +21,7 @@ import com.app85soft.qiqishop.repositories.role.RolePermissionRepository;
 import com.app85soft.qiqishop.repositories.role.RoleRepository;
 import com.app85soft.qiqishop.services.BaseService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RoleServiceImpl extends BaseService implements RoleService {
@@ -41,7 +42,6 @@ public class RoleServiceImpl extends BaseService implements RoleService {
     public Role addRole(AddRoleReq roleReq) {
         User user = getUser(PermissionKey.CREATE, PermissionType.ROLE);
         Role role = new Role();
-        role.setObjectId(user.getRole().getObjectId());
         role.setType(user.getRole().getType());
         role.setName(roleReq.getName());
         role.setNote(roleReq.getNote());
@@ -59,6 +59,8 @@ public class RoleServiceImpl extends BaseService implements RoleService {
             permission.setIsWrite(item.getIsWrite());
             permission.setIsDecision(item.getIsDecision());
             permissions.add(permission);
+            log.info("giá trị" + item.getIsView().toString());
+            log.info("giá trị" + item.getId().toString());
         }
         rolePermissionRepository.saveAll(permissions);
 

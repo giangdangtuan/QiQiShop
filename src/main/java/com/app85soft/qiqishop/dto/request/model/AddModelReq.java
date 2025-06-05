@@ -5,20 +5,24 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AddModelReq {
+    Integer id;
+    String code;
     @NotBlank
     String name;
     @NotNull
     Integer productId;
-    Integer coverImage;
-    boolean hasDiscount;
-    int discountPercentage;
     @NotNull
-    float price;
+    BigDecimal price;
     int stock;
+
+    Integer optionValue1Id;
+    Integer optionValue2Id;
 }

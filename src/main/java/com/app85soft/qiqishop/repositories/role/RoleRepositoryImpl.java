@@ -34,7 +34,6 @@ public class RoleRepositoryImpl extends BaseRepository implements RoleRepository
 
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(qRole.id.in(ids));
-        builder.and(qRole.objectId.eq(role.getObjectId()));
         builder.and(qRole.type.eq(role.getType()));
         builder.and(qRole.deleted.eq(false));
 
@@ -63,7 +62,6 @@ public class RoleRepositoryImpl extends BaseRepository implements RoleRepository
     public long countRoles(Role role, ActiveStatus status, String name) {
 
         BooleanBuilder builder = new BooleanBuilder();
-        builder.and(qRole.objectId.eq(role.getObjectId()));
         builder.and(qRole.type.eq(role.getType()));
         if (status != null) {
             builder.and(qRole.status.eq(status));
@@ -84,7 +82,6 @@ public class RoleRepositoryImpl extends BaseRepository implements RoleRepository
     public List<RoleRes> getRoles(int page, Role role, ActiveStatus status, String name) {
 
         BooleanBuilder builder = new BooleanBuilder();
-        builder.and(qRole.objectId.eq(role.getObjectId()));
         builder.and(qRole.type.eq(role.getType()));
         if (status != null) {
             builder.and(qRole.status.eq(status));
@@ -96,7 +93,7 @@ public class RoleRepositoryImpl extends BaseRepository implements RoleRepository
         return query().from(qRole)
                 .where(builder)
                 .select(Projections.fields(RoleRes.class,
-                        qRole.id, qRole.objectId, qRole.name,
+                        qRole.id, qRole.name,
                         qRole.note, qRole.type, qRole.status))
                 .offset(page * PAGE_SIZE).limit(PAGE_SIZE)
                 .orderBy(qRole.id.desc())
@@ -138,7 +135,6 @@ public class RoleRepositoryImpl extends BaseRepository implements RoleRepository
 
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(qRole.id.eq(roleId));
-        builder.and(qRole.objectId.eq(role.getObjectId()));
         builder.and(qRole.type.eq(role.getType()));
         builder.and(qRole.deleted.eq(false));
 
@@ -152,7 +148,6 @@ public class RoleRepositoryImpl extends BaseRepository implements RoleRepository
     public List<PermissionRes> getPermissions(int roleId, Role role) {
 
         BooleanBuilder builder = new BooleanBuilder();
-        builder.and(qRole.objectId.eq(role.getObjectId()));
         builder.and(qRole.type.eq(role.getType()));
         builder.and(qRole.deleted.eq(false));
         builder.and(qPermission.status.eq(ActiveStatus.ACTIVE));
@@ -181,7 +176,7 @@ public class RoleRepositoryImpl extends BaseRepository implements RoleRepository
         return query().from(qRole)
                 .where(builder)
                 .select(Projections.fields(RoleDetail.class,
-                        qRole.id.as("roleId"), qRole.objectId,
+                        qRole.id.as("roleId"),
                         qRole.type.as("roleType"),
                         qRole.name.as("roleName")))
                 .fetchOne();

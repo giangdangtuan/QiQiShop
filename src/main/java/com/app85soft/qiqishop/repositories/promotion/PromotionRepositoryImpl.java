@@ -9,6 +9,8 @@ import com.app85soft.qiqishop.entities.promotion.QPromotionModel;
 import com.app85soft.qiqishop.repositories.BaseRepository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -19,6 +21,8 @@ import java.util.stream.Collectors;
 
 import static com.app85soft.qiqishop.util.Constants.PAGE_SIZE;
 
+@Slf4j
+@Repository
 public class PromotionRepositoryImpl extends BaseRepository implements PromotionRepositoryCustom {
     private final QPromotion qPromotion = QPromotion.promotion;
     private final QPromotionModel qPromotionModel = QPromotionModel.promotionModel;

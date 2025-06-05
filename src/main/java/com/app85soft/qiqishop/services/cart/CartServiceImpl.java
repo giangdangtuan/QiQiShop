@@ -3,13 +3,10 @@ package com.app85soft.qiqishop.services.cart;
 import com.app85soft.qiqishop.component.Translator;
 import com.app85soft.qiqishop.dto.request.IdsRequest;
 import com.app85soft.qiqishop.dto.request.cart.AddToCartReq;
-import com.app85soft.qiqishop.dto.request.cart.CheckOutReq;
 import com.app85soft.qiqishop.dto.request.cart.UpdateCartReq;
 import com.app85soft.qiqishop.dto.response.BaseResponse;
-import com.app85soft.qiqishop.dto.response.address.AddressRes;
 import com.app85soft.qiqishop.dto.response.cart.AddToCartRes;
 import com.app85soft.qiqishop.dto.response.cart.CartRes;
-import com.app85soft.qiqishop.dto.response.cart.CheckOutRes;
 import com.app85soft.qiqishop.entities.cart.Cart;
 import com.app85soft.qiqishop.entities.cart.CartItem;
 import com.app85soft.qiqishop.entities.model.Model;
@@ -21,11 +18,11 @@ import com.app85soft.qiqishop.repositories.cart.CartRepository;
 import com.app85soft.qiqishop.repositories.cart_item.CartItemRepository;
 import com.app85soft.qiqishop.repositories.model.ModelRepository;
 import com.app85soft.qiqishop.services.BaseService;
+import com.app85soft.qiqishop.services.vnpay.VnpayService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -39,6 +36,7 @@ public class CartServiceImpl extends BaseService implements CartService {
     private final ModelRepository modelRepository;
     private final AddressRepository addressRepository;
     private final GhnClient ghnClient;
+    private final VnpayService vnpayService;
 
     @Override
     public AddToCartRes addToCart(AddToCartReq addToCartReq) {
@@ -81,7 +79,7 @@ public class CartServiceImpl extends BaseService implements CartService {
     }
 
     @Override
-    public BaseResponse<CartRes> updateCart(List<UpdateCartReq> cartReq) {
+    public BaseResponse<CartRes> updateCart(UpdateCartReq cartReq) {
         User user = getUser();
         Cart cart = cartRepository.findByUserId(user.getId());
         List<CartItem> cartItems = cartItemRepository.findAllByCartId(cart.getId());
@@ -89,18 +87,16 @@ public class CartServiceImpl extends BaseService implements CartService {
         Map<Integer, CartItem> itemMap = cartItems.stream()
                 .collect(Collectors.toMap(CartItem::getModelId, Function.identity()));
 
-        for (UpdateCartReq reqItem : cartReq) {
-            CartItem existingItem = itemMap.get(reqItem.getModelId());
-
-            if (existingItem != null) {
-                if (reqItem.getQuantity() > 0) {
-                    existingItem.setQuantity(reqItem.getQuantity());
-                    cartItemRepository.save(existingItem);
-                } else {
-                    cartItemRepository.delete(existingItem);
-                }
+        CartItem existingItem = itemMap.get(cartReq.getModelId());
+        if (existingItem != null) {
+            if (cartReq.getQuantity() > 0) {
+                existingItem.setQuantity(cartReq.getQuantity());
+                cartItemRepository.save(existingItem);
+            } else {
+                cartItemRepository.delete(existingItem);
             }
         }
+
         CartRes cartRes = cartRepository.getCartByUserId(user.getId());
 
         return new BaseResponse<>(cartRes);
@@ -129,44 +125,4 @@ public class CartServiceImpl extends BaseService implements CartService {
         return new BaseResponse<>(cartRes);
     }
 
-    @Override
-    public BaseResponse<CheckOutRes> checkOut(CheckOutReq req) {
-        User user = getUser();
-
-        AddressRes address;
-        if (req.getAddressId() != null) {
-            address = addressRepository.getAddress(req.getAddressId(), user.getId());
-        } else {
-            address = addressRepository.getDefaultAddress(user.getId());
-        }
-
-        List<CartRes.CartItemRes> items = cartItemRepository.getListCartIteam(req.getSelectCartItemId(), user.getId());
-        if (items == null || items.isEmpty()) {
-            throw new BusinessException(Translator.toLocale("out_of_stock"));
-        }
-        BigDecimal totalAmount = items.stream()
-                .map(CartRes.CartItemRes::getTotalAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        int totalWeight = items.stream()
-                .mapToInt(item -> item.getWeight() * item.getQuantity())
-                .sum();
-
-        Map<String, Object> feeRequest = Map.of(
-                "service_type_id", 2, // Dịch vụ GHN mặc định
-                "to_district_id", address.getDistrictGhnId(),
-                "to_ward_code", address.getWardGhnCode(),
-                "weight", totalWeight
-        );
-
-        BigDecimal shippingFee = BigDecimal.valueOf(ghnClient.calculateShippingFee(feeRequest));
-        CheckOutRes res = CheckOutRes.builder()
-                .items(items)
-                .address(address)
-                .merchandiseTotal(totalAmount)
-                .shippingCost(shippingFee)
-                .totalAmount(totalAmount.add(shippingFee))
-                .build();
-        return new BaseResponse<>(res);
-    }
 }

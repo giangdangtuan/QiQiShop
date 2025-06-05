@@ -1,6 +1,7 @@
 package com.app85soft.qiqishop.repositories.product;
 
 import com.app85soft.qiqishop.dto.constant.ActiveStatus;
+import com.app85soft.qiqishop.dto.response.product.ProductDetailRes;
 import com.app85soft.qiqishop.dto.response.product.ProductRes;
 import com.app85soft.qiqishop.entities.product.Product;
 
@@ -18,7 +19,7 @@ public interface ProductRepositoryCustom {
 
     List<ProductRes> getProductSale(ActiveStatus status, String searchKeyword, Integer categoryId, int page);
 
-    ProductRes getProductDetail(int productId);
+    ProductDetailRes getProductDetail(int productId);
 
     Product getProductToUpdate(int id);
 

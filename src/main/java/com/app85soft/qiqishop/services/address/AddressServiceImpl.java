@@ -3,6 +3,7 @@ package com.app85soft.qiqishop.services.address;
 import com.app85soft.qiqishop.component.Translator;
 import com.app85soft.qiqishop.dto.request.IdsRequest;
 import com.app85soft.qiqishop.dto.request.address.AddAddressReq;
+import com.app85soft.qiqishop.dto.request.address.SetDefaultAddressReq;
 import com.app85soft.qiqishop.dto.request.address.UpdateAddressReq;
 import com.app85soft.qiqishop.dto.response.address.AddressRes;
 import com.app85soft.qiqishop.dto.response.ghn.DistrictRes;
@@ -144,6 +145,18 @@ public class AddressServiceImpl extends BaseService implements AddressService {
                 .detailAddress(newAddress.getDetailAddress())
                 .isDefault(newAddress.isDefault())
                 .build();
+    }
+
+    @Override
+    public Address setDefaultAddress(SetDefaultAddressReq req) {
+        User user = getUser();
+        Address oldAddress = addressRepo.getAddressToUnsetDefault(user.getId());
+        oldAddress.setDefault(false);
+        addressRepo.save(oldAddress);
+        Address currentAddress = addressRepo.getAddressToUpdate(req.getId(), user.getId());
+        currentAddress.setDefault(true);
+        addressRepo.save(currentAddress);
+        return currentAddress;
     }
 
     @Override

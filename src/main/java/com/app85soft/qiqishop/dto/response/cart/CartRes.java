@@ -28,7 +28,8 @@ public class CartRes {
         String productName;
         int modelId;
         String modelName;
-        Integer cover_image;
+        String originUrl;
+        String thumbUrl;
         int quantity;
         int stock;
         int weight;

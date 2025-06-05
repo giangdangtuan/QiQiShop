@@ -7,6 +7,6 @@ import java.util.List;
 public interface CartItemRepositoryCustom {
     List<CartRes.CartItemRes> getListCartIteam(List<Integer> ids, int userId);
 
-
+    void deleteAllByIdsAndUserId(List<Integer> ids, int userId);
 
 }

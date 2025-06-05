@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -23,8 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-
 
 @Service
 class FileStorageServiceImpl extends BaseService implements FileStorageService {
@@ -116,3 +113,120 @@ class FileStorageServiceImpl extends BaseService implements FileStorageService {
     }
 
 }
+//@Service
+//class FileStorageServiceImpl extends BaseService implements FileStorageService {
+//
+//    @Autowired
+//    private StorageResource storageResource;
+//
+//    @Autowired
+//    private MediaRepository mediaRepository;
+//
+//    private static final String IMAGE_FOLDER = "image/";
+//
+//    public UploadFile storeImage(final MultipartFile file) {
+//        String timeStamp = new SimpleDateFormat(Constants.YYYY_MM_DD_HH_mm_SSS).format(new Date());
+//        String randomString = RandomStringUtils.random(6, Constants.ALPHA_NUM);
+//        String originalFileName = StringUtils.cleanPath(file.getOriginalFilename().toLowerCase());
+//        String safeFileName = cleanFileNamePreserveExtension(originalFileName);
+//
+//        String fileName = timeStamp + "_" + randomString + "_" + safeFileName;
+//        String thumbName = timeStamp + "_" + randomString + "_thumb_" + safeFileName;
+//
+//        if (fileName.contains("..")) {
+//            throw new BusinessException("Tên file không hợp lệ: " + fileName);
+//        }
+//
+//        String type = file.getContentType();
+//        if ((type == null || !type.toLowerCase().startsWith("image")) &&
+//                !(fileName.endsWith("jpg") || fileName.endsWith("jpeg") || fileName.endsWith("png"))) {
+//            throw new BusinessException("Định dạng file không được hỗ trợ");
+//        }
+//
+//        try {
+//            BufferedImage bimg = ImageIO.read(file.getInputStream());
+//
+//            UploadFile image = new UploadFile();
+//            if (bimg != null) {
+//                image.setWidth(bimg.getWidth());
+//                image.setHeight(bimg.getHeight());
+//            }
+//
+//            image.setType(UploadFileType.IMAGE);
+//            image.setSize(file.getSize());
+//            image.setOriginFilePath(IMAGE_FOLDER + fileName);
+//
+//            // Ghi file gốc
+//            String originUrl = storageResource.writeResource(file.getInputStream(), IMAGE_FOLDER + fileName);
+//            image.setOriginUrl(originUrl);
+//
+//            // Tạo thumbnail
+//            ByteArrayOutputStream thumbOutputStream = createThumbnail(file, type, fileName);
+//            if (thumbOutputStream != null) {
+//                try (InputStream thumbInputStream = new ByteArrayInputStream(thumbOutputStream.toByteArray())) {
+//                    String thumbUrl = storageResource.writeResource(thumbInputStream, IMAGE_FOLDER + thumbName);
+//                    image.setThumbUrl(thumbUrl);
+//                    image.setThumbFilePath(IMAGE_FOLDER + thumbName);
+//                }
+//            } else {
+//                image.setThumbUrl(originUrl);
+//            }
+//
+//            return mediaRepository.save(image);
+//
+//        } catch (IOException e) {
+//            throw new BusinessException("Lỗi xử lý ảnh: " + e.getMessage());
+//        }
+//    }
+//
+//    @Override
+//    public void deleteFile(int fileId) {
+//        UploadFile uploadFile = mediaRepository.findUploadFileById(fileId);
+//        if (uploadFile != null) {
+//            if (StringUtils.hasText(uploadFile.getOriginFilePath())) {
+//                storageResource.deleteFile(uploadFile.getOriginFilePath());
+//            }
+//            if (StringUtils.hasText(uploadFile.getThumbFilePath())) {
+//                storageResource.deleteFile(uploadFile.getThumbFilePath());
+//            }
+//            mediaRepository.delete(uploadFile);
+//        }
+//    }
+//
+//    public InputStream getInputStream(final String fileName) {
+//        return storageResource.readResource(fileName);
+//    }
+//
+//    private ByteArrayOutputStream createThumbnail(final MultipartFile originalFile, String contentType, String fileName) {
+//        try {
+//            String formatType = (contentType != null && contentType.contains("png")) || fileName.contains("png") ? "png" : "jpeg";
+//
+//            BufferedImage img = ImageIO.read(originalFile.getInputStream());
+//            BufferedImage thumbImg = Scalr.resize(img, Scalr.Method.AUTOMATIC, Scalr.Mode.AUTOMATIC,
+//                    Math.min(img.getWidth(), 1000), Scalr.OP_ANTIALIAS);
+//
+//            ByteArrayOutputStream output = new ByteArrayOutputStream();
+//            ImageIO.write(thumbImg, formatType, output);
+//            return output;
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
+//
+//    // ✅ Hàm xử lý tên file, giữ lại phần mở rộng
+//    private String cleanFileNamePreserveExtension(String fileName) {
+//        if (fileName == null) return null;
+//
+//        int lastDot = fileName.lastIndexOf('.');
+//        String namePart = (lastDot != -1) ? fileName.substring(0, lastDot) : fileName;
+//        String extPart = (lastDot != -1) ? fileName.substring(lastDot) : "";
+//
+//        namePart = Normalizer.normalize(namePart, Normalizer.Form.NFD)
+//                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
+//                .replaceAll("[^a-zA-Z0-9-_]", "");
+//
+//        return namePart + extPart;
+//    }
+//}

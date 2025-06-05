@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface ModelRepository extends JpaRepository<Model, Integer>, ModelRepositoryCustom {
     List<Model> findAllByProductId(int productId);
-    Model findById(int id);
+    Model getById(int id);
 }

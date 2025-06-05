@@ -1,4 +1,4 @@
-package com.app85soft.qiqishop.dto.request.cart;
+package com.app85soft.qiqishop.dto.request.model;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -10,7 +10,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CheckOutReq {
-    List<Integer> selectCartItemId;
-    Integer addressId;
+public class VariantOptionReq {
+    Integer id;
+    int productId;
+    String name;
+    List<VariantValueReq> values;
 }

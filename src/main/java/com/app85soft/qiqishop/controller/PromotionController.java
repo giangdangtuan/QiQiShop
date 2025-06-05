@@ -3,9 +3,11 @@ package com.app85soft.qiqishop.controller;
 import com.app85soft.qiqishop.dto.constant.ActiveStatus;
 import com.app85soft.qiqishop.dto.request.IdsRequest;
 import com.app85soft.qiqishop.dto.request.promotion.AddPromotionReq;
+import com.app85soft.qiqishop.dto.request.promotion.StopPromotionReq;
 import com.app85soft.qiqishop.dto.request.promotion.UpdatePromotionReq;
 import com.app85soft.qiqishop.dto.response.BaseResponse;
 import com.app85soft.qiqishop.dto.response.promotion.PromotionRes;
+import com.app85soft.qiqishop.entities.promotion.Promotion;
 import com.app85soft.qiqishop.services.promotion.PromotionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -58,5 +60,11 @@ public class PromotionController {
     @GetMapping("v1/promotion/detail/{id}")
     public ResponseEntity<BaseResponse<PromotionRes>> getPromotionDetail(@PathVariable("id") int promotionId) {
         return ResponseEntity.ok(promotionService.getPromotion(promotionId));
+    }
+
+    @Operation(summary = "Get promotion change status.")
+    @PostMapping("v1/promotion/stop")
+    public ResponseEntity<BaseResponse<Promotion>> getPromotionChangeStatus(@RequestBody @Valid StopPromotionReq req) {
+        return ResponseEntity.ok(promotionService.getChangeStatus(req));
     }
 }

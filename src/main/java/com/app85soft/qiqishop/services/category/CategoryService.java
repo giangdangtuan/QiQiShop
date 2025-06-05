@@ -15,8 +15,11 @@ public interface CategoryService {
 
     Category addCategory(AddCategoryReq request);
 
-    List<CategoryListRes> updateCategory(UpdateCategoryReq request);
+    CategoryListRes updateCategory(UpdateCategoryReq request);
 
     List<Integer> deleteCategory(IdsRequest request);
+
+    CategoryListRes getCategoryDetail(int catId);
+
 
 }

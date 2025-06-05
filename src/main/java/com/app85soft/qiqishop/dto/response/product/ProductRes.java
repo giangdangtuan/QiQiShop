@@ -20,6 +20,7 @@ public class ProductRes {
     String name;
     Integer categoryId;
     Integer coverImage;
+    String imageUrl;
     Integer weight;
     String description;
     ActiveStatus status;

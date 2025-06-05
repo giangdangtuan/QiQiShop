@@ -8,6 +8,8 @@ import java.util.List;
 public interface AddressRepositoryCustom {
     Address getAddressToUpdate(int addressId, int userId);
 
+    Address getAddressToUnsetDefault(int userId);
+
     List<Address> findByUserIdAndDeletedFalse(int userId);
 
     List<AddressRes> getAddresses(int userId);

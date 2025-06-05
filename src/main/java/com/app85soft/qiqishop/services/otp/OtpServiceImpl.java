@@ -6,7 +6,6 @@ import com.app85soft.qiqishop.dto.constant.VerifyStatus;
 import com.app85soft.qiqishop.dto.request.EmailDetail;
 import com.app85soft.qiqishop.dto.request.otp.SendOtpReq;
 import com.app85soft.qiqishop.dto.response.otp.SendOtp;
-import com.app85soft.qiqishop.dto.response.zns.ZnsResponse;
 import com.app85soft.qiqishop.entities.otp.Otp;
 import com.app85soft.qiqishop.entities.user.User;
 import com.app85soft.qiqishop.exceptions.BusinessException;
@@ -16,7 +15,6 @@ import com.app85soft.qiqishop.repositories.user.UserRepository;
 import com.app85soft.qiqishop.services.BaseService;
 import com.app85soft.qiqishop.util.Constants;
 import com.app85soft.qiqishop.util.Util;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,7 +23,6 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -33,8 +30,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service

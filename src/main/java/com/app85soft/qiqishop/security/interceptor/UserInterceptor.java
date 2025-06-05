@@ -1,5 +1,6 @@
 package com.app85soft.qiqishop.security.interceptor;
 
+import com.app85soft.qiqishop.annotations.NoRequireAuth;
 import com.app85soft.qiqishop.component.Translator;
 import com.app85soft.qiqishop.entities.user.User;
 import com.app85soft.qiqishop.exceptions.BusinessException;
@@ -14,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 @Log4j2
@@ -27,6 +29,13 @@ public class UserInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) throws Exception {
+        if (handler instanceof HandlerMethod handlerMethod) {
+            NoRequireAuth methodAnnotation = handlerMethod.getMethodAnnotation(NoRequireAuth.class);
+            NoRequireAuth classAnnotation = handlerMethod.getBeanType().getAnnotation(NoRequireAuth.class);
+            if (methodAnnotation != null || classAnnotation != null) {
+                return true;
+            }
+        }
         BusinessException exception = new BusinessException(Translator.toLocale("login_required"), HttpStatus.UNAUTHORIZED);
         String vendorCode = request.getHeader("Authorization");
         if (Strings.isEmpty(vendorCode)) {

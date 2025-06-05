@@ -37,15 +37,15 @@ public class BaseService {
         throw new BusinessException(Translator.toLocale("invalid_permission"));
     }
 
-    protected User getUser(RoleType roleType, PermissionKey key, PermissionType... groups) {
-        User user = getUser();
-        if (roleType == null && key == null && (groups == null || groups.length == 0)) {
-            return user;
-        }
-        if (roleRepository.existPermission(user.getRoleId(), groups, key, roleType)) {
-            return user;
-        }
-        throw new BusinessException(Translator.toLocale("invalid_permission"));
-    }
+//    protected User getUser(RoleType roleType, PermissionKey key, PermissionType... groups) {
+//        User user = getUser();
+//        if (roleType == null && key == null && (groups == null || groups.length == 0)) {
+//            return user;
+//        }
+//        if (roleRepository.existPermission(user.getRoleId(), groups, key, roleType)) {
+//            return user;
+//        }
+//        throw new BusinessException(Translator.toLocale("invalid_permission"));
+//    }
 
 }

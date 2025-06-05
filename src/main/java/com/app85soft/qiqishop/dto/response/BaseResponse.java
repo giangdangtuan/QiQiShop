@@ -24,6 +24,7 @@ public class BaseResponse<T> implements Serializable {
     private Long totalRecord;
     @JsonProperty("current_page")
     private Integer currentPage;
+    private Double itemRatingStar;
     private Map<String, Object> errors;
 
     public BaseResponse() {
@@ -73,6 +74,13 @@ public class BaseResponse<T> implements Serializable {
         this.data = data;
         this.totalRecord = totalRecord;
         this.currentPage = currentPage;
+    }
+
+    public BaseResponse(T data, long totalRecord, Integer currentPage, Double itemRatingStar) {
+        this.data = data;
+        this.totalRecord = totalRecord;
+        this.currentPage = currentPage;
+        this.itemRatingStar = itemRatingStar;
     }
 
     public BaseResponse(long totalRecord) {

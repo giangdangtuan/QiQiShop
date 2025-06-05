@@ -1,7 +1,6 @@
 package com.app85soft.qiqishop.entities.model;
 
 import com.app85soft.qiqishop.entities.BaseEntity;
-import com.app85soft.qiqishop.entities.product.Product;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,10 +20,14 @@ public class Model extends BaseEntity {
     String code;
     String name;
     Integer productId;
-    Integer coverImage;
     BigDecimal price;
     int stock;
     int soldCount;
 
     boolean deleted;
+
+    @Column(name = "option_value_1_id")
+    Integer optionValue1Id;
+    @Column(name = "option_value_2_id")
+    Integer optionValue2Id;
 }

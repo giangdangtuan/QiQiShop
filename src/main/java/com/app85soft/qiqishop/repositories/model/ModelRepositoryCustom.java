@@ -8,7 +8,10 @@ import java.util.List;
 
 public interface ModelRepositoryCustom {
     boolean existsByCode (String code);
+
     List<ModelRes> getModels(int productId);
 
     void softDeleteModels(Collection<Model> models);
+
+    void decreaseStock(int modelId, int quantity);
 }

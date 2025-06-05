@@ -1,5 +1,6 @@
 package com.app85soft.qiqishop.repositories.promotion_model;
 
+import com.app85soft.qiqishop.dto.constant.ActiveStatus;
 import com.app85soft.qiqishop.dto.response.promotion.PromotionModelRes;
 import com.app85soft.qiqishop.entities.model.Model;
 import com.app85soft.qiqishop.entities.promotion.PromotionModel;
@@ -8,11 +9,16 @@ import com.app85soft.qiqishop.entities.promotion.QPromotionModel;
 import com.app85soft.qiqishop.repositories.BaseRepository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
+import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
+@Repository
 public class PromotionModelRepositoryImpl extends BaseRepository implements PromotionModelRepositoryCustom {
     private final QPromotionModel qPromotionModel = QPromotionModel.promotionModel;
     private final QPromotion qPromotion = QPromotion.promotion;
@@ -43,12 +49,14 @@ public class PromotionModelRepositoryImpl extends BaseRepository implements Prom
                 .where(builder
                         .and(qPromotion.startTime.loe(endTime))
                         .and(qPromotion.endTime.goe(startTime))
+                        .and(qPromotion.status.eq(ActiveStatus.ACTIVE))
                 )
                 .select(qPromotionModel)
                 .fetch();
     }
 
     @Override
+    @Transactional
     public void softDeletePromotionModels(Collection<PromotionModel> promotionModels) {
         if (promotionModels == null || promotionModels.isEmpty()) return;
 

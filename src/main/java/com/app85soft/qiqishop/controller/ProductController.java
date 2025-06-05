@@ -1,10 +1,12 @@
 package com.app85soft.qiqishop.controller;
 
+import com.app85soft.qiqishop.annotations.NoRequireAuth;
 import com.app85soft.qiqishop.dto.constant.ActiveStatus;
 import com.app85soft.qiqishop.dto.request.IdsRequest;
 import com.app85soft.qiqishop.dto.request.product.AddProductReq;
 import com.app85soft.qiqishop.dto.request.product.UpdateProductReq;
 import com.app85soft.qiqishop.dto.response.BaseResponse;
+import com.app85soft.qiqishop.dto.response.product.ProductDetailRes;
 import com.app85soft.qiqishop.dto.response.product.ProductRes;
 import com.app85soft.qiqishop.services.product.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,6 +25,7 @@ public class ProductController {
 
     private final ProductService productService;
 
+    @NoRequireAuth
     @Operation(summary = "Get list product.")
     @GetMapping("v1/product/list")
     public ResponseEntity<BaseResponse<List<ProductRes>>> getProducts(@RequestParam int page,
@@ -53,9 +56,10 @@ public class ProductController {
         return ResponseEntity.ok(new BaseResponse<>(productService.deleteProducts(request)));
     }
 
+    @NoRequireAuth
     @Operation(summary = "Get product detail")
     @GetMapping("v1/product/detail/{id}")
-    public ResponseEntity<BaseResponse<ProductRes>> getProductDetail(@PathVariable("id") int productId) {
+    public ResponseEntity<BaseResponse<ProductDetailRes>> getProductDetail(@PathVariable("id") int productId) {
         return ResponseEntity.ok(productService.getProduct(productId));
     }
 

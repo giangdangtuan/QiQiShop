@@ -2,6 +2,8 @@ package com.app85soft.qiqishop.repositories.category;
 
 import java.util.List;
 
+import com.app85soft.qiqishop.dto.response.product.ProductDetailRes;
+import com.app85soft.qiqishop.entities.upload_file.QUploadFile;
 import org.springframework.stereotype.Repository;
 
 import com.app85soft.qiqishop.dto.response.category.CategoryListRes;
@@ -18,10 +20,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public class CategoryRepositoryImpl extends BaseRepository implements CategoryRepositoryCustom {
     private final QCategory qCategory = QCategory.category;
+    private final QUploadFile qUploadFile = QUploadFile.uploadFile;
 
     @Override
     public long countCategory() {
         BooleanBuilder builder = new BooleanBuilder();
+        builder.and(qCategory.deleted.eq(false));
         Long count = query().from(qCategory)
                 .where(builder)
                 .select(qCategory.id.count())
@@ -46,12 +50,42 @@ public class CategoryRepositoryImpl extends BaseRepository implements CategoryRe
     @Override
     public List<CategoryListRes> getCategories() {
         BooleanBuilder builder = new BooleanBuilder();
+        builder.and(qCategory.deleted.eq(false));
 
         return query().from(qCategory)
+                .leftJoin(qUploadFile).on(qUploadFile.id.eq(qCategory.coverImage)
+                        .and(qUploadFile.deleted.eq(false)))
                 .where(builder)
                 .select(Projections.fields(CategoryListRes.class,
-                        qCategory.id, qCategory.name, qCategory.status))
+                        qCategory.id,
+                        qCategory.name,
+                        qCategory.coverImage,
+                        qUploadFile.originUrl.as("imageUrl"),
+                        qCategory.status
+                ))
                 .fetch();
+    }
+
+    @Override
+    public CategoryListRes getCategoryDetail(int id) {
+        BooleanBuilder builder = new BooleanBuilder();
+        builder.and(qCategory.id.eq(id));
+        builder.and(qCategory.deleted.eq(false));
+
+        CategoryListRes category = query().from(qCategory)
+                .leftJoin(qUploadFile).on(qUploadFile.id.eq(qCategory.coverImage)
+                        .and(qUploadFile.deleted.eq(false)))
+                .where(builder)
+                .select(Projections.fields(CategoryListRes.class,
+                        qCategory.id,
+                        qCategory.name,
+                        qCategory.coverImage,
+                        qUploadFile.originUrl.as("imageUrl"),
+                        qCategory.status
+                ))
+                .fetchOne();
+
+        return category;
     }
 
     @Override

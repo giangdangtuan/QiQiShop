@@ -2,11 +2,10 @@ package com.app85soft.qiqishop.external;
 
 import com.app85soft.qiqishop.configuration.GhnConfig;
 
-import com.app85soft.qiqishop.dto.response.ghn.DistrictRes;
-import com.app85soft.qiqishop.dto.response.ghn.GhnRes;
-import com.app85soft.qiqishop.dto.response.ghn.ProvinceRes;
-import com.app85soft.qiqishop.dto.response.ghn.WardRes;
+import com.app85soft.qiqishop.dto.request.ghn.GhnCreateOrderReq;
+import com.app85soft.qiqishop.dto.response.ghn.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -14,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class GhnClient {
@@ -60,4 +60,13 @@ public class GhnClient {
                 ? response.getBody().getData().getTotal()
                 : 0;
     }
+
+    public GhnCreateOrderRes createShippingOrder(GhnCreateOrderReq body) {
+        String url = ghnConfig.getBaseUrl() + "/v2/shipping-order/create";
+        HttpEntity<GhnCreateOrderReq> entity = new HttpEntity<>(body, buildHeaders());
+        ResponseEntity<GhnCreateOrderRes> response = restTemplate.exchange(url, HttpMethod.POST, entity, GhnCreateOrderRes.class);
+
+        return response.getBody();
+    }
+
 }

@@ -4,6 +4,7 @@ import com.app85soft.qiqishop.component.Translator;
 import com.app85soft.qiqishop.dto.constant.ActiveStatus;
 import com.app85soft.qiqishop.dto.request.IdsRequest;
 import com.app85soft.qiqishop.dto.request.promotion.AddPromotionReq;
+import com.app85soft.qiqishop.dto.request.promotion.StopPromotionReq;
 import com.app85soft.qiqishop.dto.request.promotion.UpdatePromotionReq;
 import com.app85soft.qiqishop.dto.response.BaseResponse;
 import com.app85soft.qiqishop.dto.response.promotion.PromotionRes;
@@ -61,7 +62,7 @@ public class PromotionServiceImpl extends BaseService implements PromotionServic
             promotionModel.setPromotionId(promotion.getId());
             promotionModel.setModelId(item.getModelId());
             promotionModel.setDiscountPercentage(item.getDiscountPercentage());
-            promotionModel.setStatus(ActiveStatus.ACTIVE);
+            promotionModel.setStatus(item.getStatus());
             promotionModels.add(promotionModel);
         }
         promotionModelRepository.saveAll(promotionModels);
@@ -108,6 +109,7 @@ public class PromotionServiceImpl extends BaseService implements PromotionServic
             }
             promotionModel.setDiscountPercentage(item.getDiscountPercentage());
             promotionModel.setStatus(item.getStatus());
+            promotionModel.setDeleted(false);
 
             updatedPromotionModels.add(promotionModel);
         }
@@ -151,6 +153,20 @@ public class PromotionServiceImpl extends BaseService implements PromotionServic
             throw new BusinessException(Translator.toLocale("id_not_exist"), HttpStatus.NOT_FOUND);
         }
         return new BaseResponse<>(promotionRes);
+    }
+
+    @Override
+    public BaseResponse<Promotion> getChangeStatus(StopPromotionReq req) {
+        User user = getUser(PermissionKey.CREATE, PermissionType.PRODUCT);
+
+        Promotion promotion = promotionRepository.getPromotionToUpdate(req.getPromotionId());
+        if (promotion == null) {
+            throw new BusinessException(Translator.toLocale("id_not_exist"), HttpStatus.NOT_FOUND);
+        }
+        promotion.setStatus(ActiveStatus.INACTIVE);
+        promotionRepository.save(promotion);
+
+        return new BaseResponse<>(promotion);
     }
 
     private PromotionRes getPromotionRes(Promotion promotion, List<PromotionModel> promotionModels) {

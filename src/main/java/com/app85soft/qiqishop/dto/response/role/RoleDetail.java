@@ -13,7 +13,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RoleDetail {
     Integer roleId;
-    Integer objectId;
     String roleName;
     RoleType roleType;
 

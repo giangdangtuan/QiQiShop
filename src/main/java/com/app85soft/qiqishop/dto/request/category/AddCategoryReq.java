@@ -13,5 +13,6 @@ import lombok.experimental.FieldDefaults;
 public class AddCategoryReq {
     @NotBlank
     String name;
+    Integer coverImage;
     ActiveStatus status;
 }

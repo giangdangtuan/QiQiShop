@@ -19,7 +19,6 @@ import lombok.experimental.FieldDefaults;
 @Table(name = "roles")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Role extends BaseEntity {
-    int objectId;
     String name;
     String note;
 

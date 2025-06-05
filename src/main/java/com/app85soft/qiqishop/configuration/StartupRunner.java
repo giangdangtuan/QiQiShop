@@ -1,5 +1,6 @@
 package com.app85soft.qiqishop.configuration;
 
+import com.app85soft.qiqishop.external.GhnClient;
 import com.app85soft.qiqishop.repositories.address.ProvinceRepository;
 import com.app85soft.qiqishop.services.address.AddressService;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ public class StartupRunner implements ApplicationRunner {
 
     private final AddressService addressService;
     private final ProvinceRepository provinceRepository;
+    private final GhnClient ghnClient;
 
     @Override
     public void run(ApplicationArguments args) {

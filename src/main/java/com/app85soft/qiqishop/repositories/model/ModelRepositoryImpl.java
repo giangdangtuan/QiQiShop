@@ -7,12 +7,16 @@ import com.app85soft.qiqishop.entities.role.QRole;
 import com.app85soft.qiqishop.repositories.BaseRepository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
+@Repository
 public class ModelRepositoryImpl extends BaseRepository implements ModelRepositoryCustom {
     private final QModel qModel = QModel.model;
     private final QRole qRole = QRole.role;
@@ -40,8 +44,7 @@ public class ModelRepositoryImpl extends BaseRepository implements ModelReposito
         return query().from(qModel)
                 .where(builder)
                 .select(Projections.fields(ModelRes.class,
-                        qModel.code, qModel.name, qModel.productId,
-                        qModel.coverImage, qModel.price,
+                        qModel.code, qModel.name, qModel.productId, qModel.price,
                         qModel.stock, qModel.soldCount))
                 .fetch();
     }
@@ -62,6 +65,15 @@ public class ModelRepositoryImpl extends BaseRepository implements ModelReposito
         query().update(qModel)
                 .set(qModel.deleted, true)
                 .where(builder)
+                .execute();
+    }
+
+    @Override
+    @Transactional
+    public void decreaseStock(int modelId, int quantity) {
+        query().update(qModel)
+                .set(qModel.stock, qModel.stock.subtract(quantity))
+                .where(qModel.id.eq(modelId).and(qModel.stock.goe(quantity)))
                 .execute();
     }
 }

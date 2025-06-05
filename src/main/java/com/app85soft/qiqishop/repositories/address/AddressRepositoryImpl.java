@@ -33,6 +33,18 @@ public class AddressRepositoryImpl extends BaseRepository implements AddressRepo
     }
 
     @Override
+    public Address getAddressToUnsetDefault(int userId) {
+        BooleanBuilder builder = new BooleanBuilder();
+        builder.and(qAddress.isDefault.eq(true));
+        builder.and(qAddress.userId.eq(userId));
+        builder.and(qAddress.deleted.eq(false));
+        return query().from(qAddress)
+                .where(builder)
+                .select(qAddress)
+                .fetchOne();
+    }
+
+    @Override
     public List<Address> findByUserIdAndDeletedFalse(int userId) {
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(qAddress.userId.eq(userId));
@@ -60,8 +72,11 @@ public class AddressRepositoryImpl extends BaseRepository implements AddressRepo
                                 qAddress.userId,
                                 qAddress.consignee,
                                 qAddress.phone,
+                                qProvince.id.as("provinceId"),
                                 qProvince.name.as("provinceName"),
+                                qDistrict.id.as("districtId"),
                                 qDistrict.name.as("districtName"),
+                                qWard.id.as("wardId"),
                                 qWard.name.as("wardName"),
                                 qAddress.detailAddress,
                                 qAddress.isDefault

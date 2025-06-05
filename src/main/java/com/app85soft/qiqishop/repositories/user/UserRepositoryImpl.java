@@ -2,6 +2,8 @@ package com.app85soft.qiqishop.repositories.user;
 
 import java.util.List;
 
+import com.app85soft.qiqishop.dto.response.file.UploadFileRes;
+import com.app85soft.qiqishop.entities.upload_file.QUploadFile;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UserRepositoryImpl extends BaseRepository implements UserRepositoryCustom {
         private final QUser qUser = QUser.user;
         private final QRole qRole = QRole.role;
+        private final QUploadFile qUploadFile = QUploadFile.uploadFile;
 
         @Override
         public User loginByPhone(String phone) {
@@ -65,11 +68,9 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
         }
 
         @Override
-        public long countUser(ActiveStatus status, String searchKeyword, Role role) {
+        public long countUser(ActiveStatus status, String searchKeyword) {
 
                 BooleanBuilder builder = new BooleanBuilder();
-                builder.and(qRole.objectId.eq(role.getObjectId()));
-                builder.and(qRole.type.eq(role.getType()));
                 if (status != null) {
                         builder.and(qUser.status.eq(status));
                 }
@@ -80,7 +81,6 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
                                         qUser.email.contains(searchKeyword));
                 }
                 Long count = query().from(qUser)
-                                .innerJoin(qRole).on(qRole.id.eq(qUser.roleId))
                                 .where(builder)
                                 .select(qUser.id.count())
                                 .fetchOne();
@@ -88,11 +88,9 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
         }
 
         @Override
-        public List<UserListRes> getUsers(ActiveStatus status, String searchKeyword, int page, Role role) {
+        public List<UserListRes> getUsers(ActiveStatus status, String searchKeyword, int page) {
 
                 BooleanBuilder builder = new BooleanBuilder();
-                // builder.and(qRole.objectId.eq(role.getObjectId()));
-                // builder.and(qRole.type.eq(role.getType()));
                 if (status != null) {
                         builder.and(qUser.status.eq(status));
                 }
@@ -103,7 +101,6 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
                                         qUser.email.contains(searchKeyword));
                 }
                 return query().from(qUser)
-                                // .innerJoin(qRole).on(qRole.id.eq(qUser.roleId))
                                 .where(builder)
                                 .select(Projections.fields(UserListRes.class,
                                                 qUser.id, qUser.code, qUser.name, qUser.email,
@@ -111,7 +108,6 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
                                                 qUser.birthday, qUser.gender,
                                                 Projections.fields(RoleDetail.class,
                                                                 qRole.id.as("roleId"),
-                                                                qRole.objectId,
                                                                 qRole.type.as("roleType"),
                                                                 qRole.name.as("roleName"))
                                                                 .as("role")))
@@ -121,51 +117,41 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
         }
 
         @Override
-        public UserDetailRes getProfileUser(int accountId, Role role) {
+        public UserDetailRes getProfileUser(int accountId) {
 
                 BooleanBuilder builder = new BooleanBuilder();
                 builder.and(qUser.id.eq(accountId));
-                builder.and(qRole.objectId.eq(role.getObjectId()));
-                builder.and(qRole.type.eq(role.getType()));
                 builder.and(qUser.deleted.eq(false));
 
                 return query().from(qUser)
-                                .innerJoin(qRole).on(qRole.id.eq(qUser.roleId))
+                                .leftJoin(qUploadFile).on(qUploadFile.id.eq(qUser.avatarId)
+                                        .and(qUploadFile.deleted.eq(false)))
                                 .where(builder)
                                 .select(Projections.fields(UserDetailRes.class,
                                                 qUser.id, qUser.code, qUser.phone, qUser.name,
                                                 qUser.email, qUser.birthday, qUser.gender,
-                                                qUser.status,
+                                                qUser.status, qUser.avatarId,
                                                 Projections.fields(RoleDetail.class,
                                                                 qRole.id.as("roleId"),
-                                                                qRole.objectId,
                                                                 qRole.type.as("roleType"),
                                                                 qRole.name.as("roleName"))
-                                                                .as("role")
-                                // Projections.fields(PermissionRes.class,
-                                // qPermission.id.as("permisstionId"),
-                                // qPermission.title.as("title"),
-                                // qPermission.permission.getRoot(),
-                                // qPermission.isView.as("isView"),
-                                // qPermission.isWrite.as("isWrite"),
-                                // qPermission.isApproval.as("isApproval"),
-                                // qPermission.isDecision.as("isDecision"))
-                                // .as("permissions")
+                                                                .as("role"),
+                                                Projections.fields(UploadFileRes.class,
+                                                                qUploadFile.originUrl,
+                                                                qUploadFile.thumbUrl)
+                                                                .as("avatar")
                                 ))
                                 .fetchOne();
         }
 
         @Override
-        public List<Integer> getAllIdToCheckExist(List<Integer> userIds, Role role) {
+        public List<Integer> getAllIdToCheckExist(List<Integer> userIds) {
 
                 BooleanBuilder builder = new BooleanBuilder();
                 builder.and(qUser.id.in(userIds));
-                builder.and(qRole.objectId.eq(role.getObjectId()));
-                builder.and(qRole.type.eq(role.getType()));
                 builder.and(qUser.deleted.eq(false));
 
                 return query().from(qUser)
-                                .innerJoin(qRole).on(qRole.id.eq(qUser.roleId))
                                 .where(builder)
                                 .select(qUser.id)
                                 .fetch();
@@ -186,12 +172,10 @@ public class UserRepositoryImpl extends BaseRepository implements UserRepository
         }
 
         @Override
-        public User getUserToUpdate(int userId, Role role) {
+        public User getUserToUpdate(int userId) {
 
                 BooleanBuilder builder = new BooleanBuilder();
                 builder.and(qUser.id.eq(userId));
-                builder.and(qRole.objectId.eq(role.getObjectId()));
-                builder.and(qRole.type.eq(role.getType()));
                 builder.and(qUser.deleted.eq(false));
                 return query().from(qUser)
                                 .innerJoin(qRole).on(qRole.id.eq(qUser.roleId))

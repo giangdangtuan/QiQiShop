@@ -1,6 +1,7 @@
-package com.app85soft.qiqishop.dto.response.cart;
+package com.app85soft.qiqishop.dto.response.payment;
 
 import com.app85soft.qiqishop.dto.response.address.AddressRes;
+import com.app85soft.qiqishop.dto.response.cart.CartRes;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -20,5 +21,6 @@ public class CheckOutRes {
     BigDecimal merchandiseTotal;
     BigDecimal shippingCost;
     BigDecimal totalAmount;
-
+    String paymentUrl;
+    String orderCode;
 }

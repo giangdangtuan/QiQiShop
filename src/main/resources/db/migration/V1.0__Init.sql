@@ -20,13 +20,15 @@ CREATE TABLE `upload_files`
 
 CREATE TABLE `category`
 (
-    `id`          int unsigned NOT NULL AUTO_INCREMENT,
-    `name`        varchar(255) NOT NULL,
-    `status`      int          NOT NULL COMMENT 'Trạng thái hoạt động: `0`: Không hoạt động, 1: Hoạt động',
-    `deleted`     bit          NOT NULL DEFAULT 0 COMMENT 'Đánh dấu trạng thái xóa của bản ghi: `0`: Chưa xóa, `1`: Đã xóa',
-    `created_at`  datetime     NOT NULL,
-    `updated_at`  datetime     NOT NULL,
-    PRIMARY KEY (`id`)
+    `id`              int unsigned NOT NULL AUTO_INCREMENT,
+    `name`            varchar(255) NOT NULL,
+    `cover_image`     int unsigned          DEFAULT NULL COMMENT 'Khóa ngoại tham chiếu đến ảnh bìa sản phẩm',
+    `status`          int          NOT NULL COMMENT 'Trạng thái hoạt động: `0`: Không hoạt động, 1: Hoạt động',
+    `deleted`         bit          NOT NULL DEFAULT 0 COMMENT 'Đánh dấu trạng thái xóa của bản ghi: `0`: Chưa xóa, `1`: Đã xóa',
+    `created_at`      datetime     NOT NULL,
+    `updated_at`      datetime     NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`cover_image`) REFERENCES `upload_files` (`id`)
 ) ENGINE = InnoDB COMMENT 'Ngành hàng'
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci;
@@ -53,11 +55,56 @@ CREATE TABLE `product`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci;
 
+CREATE TABLE `product_images`
+(
+    `id`          int unsigned NOT NULL AUTO_INCREMENT,
+    `product_id`  int unsigned NOT NULL COMMENT 'Khóa ngoại tới bảng sản phẩm',
+    `image_id`    int unsigned NOT NULL COMMENT 'Khóa ngoại tới bảng upload_files',
+    `sort_order`  int                   DEFAULT 0 COMMENT 'Thứ tự hiển thị',
+    `deleted`     bit(1)       NOT NULL DEFAULT b'0',
+    `created_at`  datetime     NOT NULL,
+    `updated_at`  datetime     NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`product_id`) REFERENCES `product` (`id`),
+    FOREIGN KEY (`image_id`) REFERENCES `upload_files` (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
+CREATE TABLE `variant_option`
+(
+    `id`                     int unsigned    NOT NULL AUTO_INCREMENT,
+    `product_id`             int unsigned    NOT NULL COMMENT 'Khóa ngoại tham chiếu đến sản phẩm',
+    `name`                   varchar(255)             DEFAULT NULL,
+    `deleted`                bit             NOT NULL DEFAULT 0 COMMENT 'Đánh dấu trạng thái xóa của bản ghi: `0`: Chưa xóa, `1`: Đã xóa',
+    `created_at`             datetime        NOT NULL,
+    `updated_at`             datetime        NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`product_id`) REFERENCES `product` (`id`)
+) ENGINE = InnoDB COMMENT 'Phân loại biến thể'
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
+CREATE TABLE `variant_value`
+(
+    `id`                     int unsigned    NOT NULL AUTO_INCREMENT,
+    `option_type_id`         int unsigned    NOT NULL COMMENT 'Khóa ngoại tham chiếu đến phân loại biến thể',
+    `value`                  varchar(255)             DEFAULT NULL,
+    `deleted`                bit             NOT NULL DEFAULT 0 COMMENT 'Đánh dấu trạng thái xóa của bản ghi: `0`: Chưa xóa, `1`: Đã xóa',
+    `created_at`             datetime        NOT NULL,
+    `updated_at`             datetime        NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`option_type_id`) REFERENCES `variant_option` (`id`)
+) ENGINE = InnoDB COMMENT 'Biến thể'
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
 CREATE TABLE `model`
 (
     `id`                     int unsigned    NOT NULL AUTO_INCREMENT,
-    `product_id`             int unsigned    NOT NULL COMMENT 'Khóa ngoại tham chiếu đến ngành hàng',
-    `cover_image`            int unsigned             DEFAULT NULL COMMENT 'Khóa ngoại tham chiếu đến ảnh bìa sản phẩm biến thể',
+    `product_id`             int unsigned    NOT NULL COMMENT 'Khóa ngoại tham chiếu đến sản phẩm',
+    `option_value_1_id`      int unsigned             DEFAULT NULL COMMENT 'Khóa ngoại tham chiếu đến biến thể',
+    `option_value_2_id`      int unsigned             DEFAULT NULL COMMENT 'Khóa ngoại tham chiếu đến biến thể',
     `code`                   varchar(50)     NOT NULL COMMENT 'Mã sản phẩm duy nhất',
     `name`                   varchar(255)             DEFAULT NULL,
     `price`                  DECIMAL(10, 2)  NOT NULL COMMENT 'Giá sản phẩm',
@@ -67,9 +114,9 @@ CREATE TABLE `model`
     `created_at`             datetime        NOT NULL,
     `updated_at`             datetime        NOT NULL,
     PRIMARY KEY (`id`),
-    UNIQUE  KEY (`code`),
     FOREIGN KEY (`product_id`) REFERENCES `product` (`id`),
-    FOREIGN KEY (`cover_image`) REFERENCES `upload_files` (`id`)
+    FOREIGN KEY (`option_value_1_id`) REFERENCES `variant_value` (`id`),
+    FOREIGN KEY (`option_value_2_id`) REFERENCES `variant_value` (`id`)
 ) ENGINE = InnoDB COMMENT 'Sản phẩm biến thể'
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci;
@@ -130,7 +177,6 @@ CREATE TABLE `permissions`
 CREATE TABLE `roles`
 (
     `id`         int unsigned NOT NULL AUTO_INCREMENT,
-    `object_id`  int unsigned NOT NULL COMMENT 'Khóa ngoại tham chiếu đến nhà cung cấp nội dung/ thiết bị/ bản quyền/ cửa hàng tương ứng với trường type',
     `name`       varchar(255) NOT NULL COMMENT 'Tên của vai trò',
     `note`       TEXT                  DEFAULT NULL COMMENT 'Ghi chú bổ sung về vai trò',
     `type`       int          NOT NULL COMMENT '0 - SUPER_ADMIN, 1 - USER, 2 - ACCOUNT_ADMIN, 3 - PRODUCT_ADMIN, 4 - POST_ADMIN',
@@ -285,16 +331,18 @@ CREATE TABLE `address`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci;
 
-CREATE TABLE `order`
+CREATE TABLE `orders`
 (
-    `id`                  int unsigned NOT NULL AUTO_INCREMENT,
-    `user_id`             int unsigned NOT NULL COMMENT 'Khóa ngoại tham chiếu đến user',
-    `address_id`          int unsigned NOT NULL COMMENT 'Khóa ngoại tham chiếu đến địa chỉ',
-    `code`                varchar(50)  NOT NULL COMMENT 'Mã người dùng duy nhất',
-    `status`              int          NOT NULL COMMENT 'Trạng thái hoạt động: `0`: Đã thanh toán, 1: Chưa thanh toán',
-    `deleted`             bit          NOT NULL DEFAULT 0 COMMENT 'Đánh dấu trạng thái xóa của bản ghi: `0`: Chưa xóa, `1`: Đã xóa',
-    `created_at`          datetime     NOT NULL,
-    `updated_at`          datetime     NOT NULL,
+    `id`                  int unsigned    NOT NULL AUTO_INCREMENT,
+    `user_id`             int unsigned    NOT NULL COMMENT 'Khóa ngoại tham chiếu đến user',
+    `address_id`          int unsigned    NOT NULL COMMENT 'Khóa ngoại tham chiếu đến địa chỉ',
+    `code`                varchar(50)     NOT NULL COMMENT 'Mã người dùng duy nhất',
+    `total_price`         DECIMAL(10, 2)  NOT NULL COMMENT 'Tổng tiền hóa đơn',
+    `payment_method`      int                      DEFAULT '0',
+    `status`              int             NOT NULL COMMENT 'Trạng thái',
+    `deleted`             bit             NOT NULL DEFAULT 0 COMMENT 'Đánh dấu trạng thái xóa của bản ghi: `0`: Chưa xóa, `1`: Đã xóa',
+    `created_at`          datetime        NOT NULL,
+    `updated_at`          datetime        NOT NULL,
     PRIMARY KEY (`id`),
     FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
     FOREIGN KEY (`address_id`) REFERENCES `address` (`id`)
@@ -305,87 +353,70 @@ CREATE TABLE `order`
 
 CREATE TABLE `order_detail`
 (
-    `id`                  int unsigned NOT NULL AUTO_INCREMENT,
-    `order_id`            int unsigned NOT NULL COMMENT 'Khóa ngoại tham chiếu đến user',
-    `model_id`            int unsigned NOT NULL COMMENT 'Khóa ngoại tham chiếu đến địa chỉ',
-    `amount`              int          NOT NULL COMMENT 'Số lượng',
-    `deleted`             bit          NOT NULL DEFAULT 0 COMMENT 'Đánh dấu trạng thái xóa của bản ghi: `0`: Chưa xóa, `1`: Đã xóa',
-    `created_at`          datetime     NOT NULL,
-    `updated_at`          datetime     NOT NULL,
+    `id`                  int unsigned      NOT NULL AUTO_INCREMENT,
+    `order_id`            int unsigned      NOT NULL COMMENT 'Khóa ngoại tham chiếu đến user',
+    `model_id`            int unsigned      NOT NULL COMMENT 'Khóa ngoại tham chiếu đến địa chỉ',
+    `amount`              int               NOT NULL COMMENT 'Số lượng',
+    `original_price`      DECIMAL(10, 2)    NOT NULL COMMENT 'Giá niêm yết',
+    `final_price`         DECIMAL(10, 2)    NOT NULL COMMENT 'Giá sau khi giảm',
+    `deleted`             bit               NOT NULL DEFAULT 0 COMMENT 'Đánh dấu trạng thái xóa của bản ghi: `0`: Chưa xóa, `1`: Đã xóa',
+    `created_at`          datetime          NOT NULL,
+    `updated_at`          datetime          NOT NULL,
     PRIMARY KEY (`id`),
-    FOREIGN KEY (`order_id`) REFERENCES `order` (`id`),
+    FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`),
     FOREIGN KEY (`model_id`) REFERENCES `model` (`id`)
 ) ENGINE = InnoDB COMMENT 'Chi tiết hóa đơn'
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci;
 
 
--- CREATE TABLE `devices`
--- (
---     `id`                 int unsigned NOT NULL AUTO_INCREMENT,
---     `code`               varchar(50)  NOT NULL COMMENT 'Mã thiết bị duy nhất',
---     `name`               varchar(255)          DEFAULT NULL,
---     `model`              varchar(255)          DEFAULT NULL,
---     `serial`             varchar(255)          DEFAULT NULL,
---     `provider_device_id` int unsigned NOT NULL,
---     `status`             int          NOT NULL COMMENT 'Trạng thái hoạt động của người dùng (0: Không hoạt động, 1: Hoạt động)',
---     `deleted`            bit(1)       NOT NULL DEFAULT 0,
---     `created_at`         datetime     NOT NULL,
---     `updated_at`         datetime     NOT NULL,
---     PRIMARY KEY (`id`),
---     UNIQUE KEY (`code`),
---     FOREIGN KEY (`provider_device_id`) REFERENCES `provider_devices` (`id`)
--- ) ENGINE = InnoDB
---   DEFAULT CHARSET = utf8mb4
---   COLLATE = utf8mb4_0900_ai_ci;
-
--- CREATE TABLE `songs`
--- (
---     `id`                  int unsigned NOT NULL AUTO_INCREMENT,
---     `code`                varchar(50)  NOT NULL COMMENT 'Mã bài hát duy nhất',
---     `provider_content_id` int unsigned NOT NULL,
---     `name`                varchar(255)          DEFAULT NULL,
---     `singer`              varchar(255)          DEFAULT NULL,
---     `author`              varchar(255)          DEFAULT NULL,
---     `created_by`          int unsigned NOT NULL,
---     `updated_by`          int unsigned NOT NULL,
---     `status`              int          NOT NULL,
---     `deleted`             bit(1)       NOT NULL DEFAULT 0,
---     `created_at`          datetime     NOT NULL,
---     `updated_at`          datetime     NOT NULL,
---     PRIMARY KEY (`id`),
---     UNIQUE KEY (`code`),
---     FOREIGN KEY (`provider_content_id`) REFERENCES `provider_contents` (`id`),
---     FOREIGN KEY (`created_by`) REFERENCES `users` (`id`),
---     FOREIGN KEY (`updated_by`) REFERENCES `users` (`id`)
--- ) ENGINE = InnoDB
---   DEFAULT CHARSET = utf8mb4
---   COLLATE = utf8mb4_0900_ai_ci;
-
 CREATE TABLE `transactions`
 (
-    `id`              int unsigned NOT NULL AUTO_INCREMENT,
-    `code`            varchar(50)  NOT NULL,
-    `reference_code`  varchar(255)          DEFAULT NULL,
-    `user_id`         int unsigned NOT NULL,
-    `amount`          bigint       NOT NULL DEFAULT 0,
-    `payment_gateway` int          NOT NULL,
+    `id`              int unsigned          NOT NULL AUTO_INCREMENT,
+    `code`            varchar(50)           NOT NULL,
+    `reference_code`  varchar(255)                   DEFAULT NULL,
+    `user_id`         int unsigned          NOT NULL,
+    `order_id`        int unsigned          NOT NULL,
+    `amount`          DECIMAL(10, 2)        NOT NULL DEFAULT 0,
+    `payment_gateway` int                   NOT NULL,
     `note`            text,
-    `pay_date`        datetime              DEFAULT NULL,
+    `pay_date`        BIGINT                         DEFAULT NULL COMMENT 'Ngày thanh toán',
     `description`     text,
-    `type`            int                   DEFAULT '0',
-    `status`          int          NOT NULL,
-    `deleted`         bit(1)       NOT NULL DEFAULT b'0',
-    `created_at`      datetime     NOT NULL,
-    `updated_at`      datetime     NOT NULL,
+    `payment_method`  int                            DEFAULT '0',
+    `status`          int                   NOT NULL,
+    `deleted`         bit(1)                NOT NULL DEFAULT b'0',
+    `created_at`      datetime              NOT NULL,
+    `updated_at`      datetime              NOT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY (`code`),
     UNIQUE KEY (`reference_code`, `payment_gateway`),
-    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+    FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci;
 
+
+CREATE TABLE `ratings`
+(
+    `id`              int unsigned          NOT NULL AUTO_INCREMENT,
+    `user_id`         int unsigned          NOT NULL COMMENT 'Khóa ngoại tham chiếu người dùng',
+    `order_id`        int unsigned          NOT NULL COMMENT 'Khóa ngoại tham chiếu hóa đơn',
+    `model_id`        int unsigned          NOT NULL COMMENT 'Khóa ngoại tham chiếu sản phẩm biến thể',
+    `rating_image`    int unsigned                   DEFAULT NULL COMMENT 'Khóa ngoại tham chiếu đến ảnh đánh giá',
+    `content`         varchar(255)          NOT NULL,
+    `rating_star`     int unsigned          NOT NULL,
+    `deleted`         bit(1)                NOT NULL DEFAULT b'0',
+    `created_at`      datetime              NOT NULL,
+    `updated_at`      datetime              NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+    FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`),
+    FOREIGN KEY (`model_id`) REFERENCES `model` (`id`),
+    FOREIGN KEY (`rating_image`) REFERENCES `upload_files` (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
 
 
 CREATE TABLE `otp`
@@ -638,8 +669,9 @@ VALUES (1, 'Tổng quan', 'DASHBOARD', 'STATISTIC', true, null, null, null, 0, 1
        (15, 'Quản lý bài đăng', 'POST', 'FEATURE', true, true, true, true, 4, 1, now(), now()),
        (16, 'Quản lý giao dịch', 'TRANSACTION', 'FEATURE', true, true, true, true, 4, 1, now(), now());
 
-INSERT INTO roles (`id`, `name`, object_id, `type`, `status`, `created_at`, `updated_at`)
-VALUES (1, 'Admin', 0, 0, 1, now(), now());
+INSERT INTO roles (`id`, `name`, `type`, `status`, `created_at`, `updated_at`)
+VALUES (1, 'Admin', 0, 1, now(), now()),
+       (2, 'User', 1, 1, now(), now());
 
 INSERT INTO role_permission (`role_id`, `permission_id`, `can_view`, `can_write`, `can_approval`, `can_decision`,
                              `created_at`, `updated_at`)
@@ -653,9 +685,30 @@ VALUES (1, 1, 1, null, null, null, now(), now()),
 INSERT INTO users (`id`, `code`, `name`, `phone`, `email`, `password`, `role_id`, `status`, `created_at`, `updated_at`)
 VALUES (1, 'ABCDEFGH', 'Admin', '0365517544', 'admin@gmail.com',
         '$2a$10$fSP7.73InP1cNoVOdqt7P.mb/pzn93gPrKLOixxenooOP3D77hGF.', 1, 1,
+        now(), now()),
+       (2, 'BCDEGHAS', 'User', '0976225813', 'user@gmail.com',
+        '$2a$10$fSP7.73InP1cNoVOdqt7P.mb/pzn93gPrKLOixxenooOP3D77hGF.', 1, 1,
         now(), now());
 
 INSERT INTO category (`id`, `name`, `status`, `created_at`, `updated_at`)
 VALUES (1, 'Tóc búi', 1,now(), now()),
        (2, 'Chun buộc tóc', 1,now(), now());
 
+-- INSERT INTO `product` (`id`, `category_id`, `cover_image`, `code`, `name`, `description`, `weight`,`status`, `deleted`, `created_at`, `updated_at`)
+-- VALUES (1,1,null,'IP14-0001','iPhone 14','Điện thoại Apple iPhone 14 chính hãng VN/A',
+--         20,1,0,NOW(), NOW()),
+--        (2,2,null,'IP14-0002','iPhone 14','Điện thoại Apple iPhone 14 chính hãng VN/A',
+--         10,1,0,NOW(), NOW());
+
+-- INSERT INTO `model` (`id`, `product_id`, `code`, `name`, `price`, `stock`, `sold_count`, `deleted`, `created_at`, `updated_at`)
+-- VALUES (1,1,null,'IP14-BLACK-128GB','iPhone 14 Đen 128GB',19000,50,10,0,NOW(), NOW()),
+--        (2,1,null,'IP14-RED-256GB','iPhone 14 Đỏ 256GB',21000,50,10,0,NOW(), NOW()),
+--        (3,2,null,'IP14-GOLD-512GB','iPhone 14 Vàng 512GB',25000,50,10,0,NOW(), NOW()),
+--        (4,2,null,'IP14-SILVER-128GB','iPhone 14 Bạc 128GB',22500,50,10,0,NOW(), NOW());
+
+-- INSERT INTO `cart` (`id`, `user_id`, `deleted`, `created_at`, `updated_at`)
+-- VALUES (1, 2, 0, NOW(), NOW());
+--
+-- INSERT INTO `cart_item` (`id`, `cart_id`, `model_id`, `quantity`, `deleted`, `created_at`, `updated_at`)
+-- VALUES (1,1, 1, 2, 0, NOW(), NOW()),
+--        (2,1, 3, 5, 0, NOW(), NOW());

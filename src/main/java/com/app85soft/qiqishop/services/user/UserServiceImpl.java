@@ -10,6 +10,7 @@ import com.app85soft.qiqishop.dto.request.auth.ForgotPasswordReq;
 import com.app85soft.qiqishop.dto.request.auth.UserLoginReq;
 import com.app85soft.qiqishop.dto.request.user.*;
 import com.app85soft.qiqishop.dto.response.BaseResponse;
+import com.app85soft.qiqishop.dto.response.file.UploadFileRes;
 import com.app85soft.qiqishop.dto.response.role.RoleDetail;
 import com.app85soft.qiqishop.dto.response.user.UserDetailRes;
 import com.app85soft.qiqishop.dto.response.user.UserListRes;
@@ -21,6 +22,7 @@ import com.app85soft.qiqishop.entities.role.permisstion.Permission;
 import com.app85soft.qiqishop.entities.role.role_permission.RolePermission;
 import com.app85soft.qiqishop.entities.user.User;
 import com.app85soft.qiqishop.exceptions.BusinessException;
+import com.app85soft.qiqishop.repositories.media.MediaRepository;
 import com.app85soft.qiqishop.repositories.otp.OtpRepository;
 import com.app85soft.qiqishop.repositories.permission.PermissionRepository;
 import com.app85soft.qiqishop.repositories.role.RolePermissionRepository;
@@ -52,6 +54,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
     private final RolePermissionRepository rolePermissionRepository;
+    private final MediaRepository mediaRepository;
 
     @Value("${app.jwtAdminExpirationInMs}")
     private int jwtExpirationInMs;
@@ -105,12 +108,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         String code = generateCode(8);
 
-        Role role = new Role();
-        role.setObjectId(1);
-        role.setStatus(ActiveStatus.ACTIVE);
-        role.setName("User");
-        role.setType(RoleType.USER);
-        roleRepository.save(role);
+        Role role = roleRepository.findByType(RoleType.USER);
 
         List<Permission> permissions = permissionRepository.getPermissions(RoleType.USER);
         List<RolePermission> rolePermissions = new ArrayList<>();
@@ -148,8 +146,8 @@ public class UserServiceImpl extends BaseService implements UserService {
     public BaseResponse<List<UserListRes>> getUsers(ActiveStatus status, String searchKeyword, int page) {
         User user = getUser(PermissionKey.READ, PermissionType.ACCOUNT);
 
-        long count = userRepository.countUser(status, searchKeyword, user.getRole());
-        List<UserListRes> users = userRepository.getUsers(status, searchKeyword, page, user.getRole());
+        long count = userRepository.countUser(status, searchKeyword);
+        List<UserListRes> users = userRepository.getUsers(status, searchKeyword, page);
         return new BaseResponse<>(users, count, page);
     }
 
@@ -157,7 +155,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     public BaseResponse<UserDetailRes> getDetailMember(int accountId) {
         User user = getUser(PermissionKey.READ, PermissionType.ACCOUNT);
 
-        UserDetailRes userRes = userRepository.getProfileUser(accountId, user.getRole());
+        UserDetailRes userRes = userRepository.getProfileUser(accountId);
         if (userRes == null) {
             throw new BusinessException(Translator.toLocale("id_not_exist"), HttpStatus.NOT_FOUND);
         }
@@ -184,7 +182,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Override
     public UserDetailRes updateMember(UpdateUserReq request) {
         User user = getUser(PermissionKey.CREATE, PermissionType.ACCOUNT);
-        User currentUser = userRepository.getUserToUpdate(request.getUserId(), user.getRole());
+        User currentUser = userRepository.getUserToUpdate(request.getUserId());
         if (currentUser == null) {
             throw new BusinessException(Translator.toLocale("user_id_not_exist"));
         }
@@ -209,6 +207,9 @@ public class UserServiceImpl extends BaseService implements UserService {
         if (request.getRoleId() != null) {
             currentUser.setRoleId(request.getRoleId());
         }
+        if (request.getAvatarId() != null) {
+            currentUser.setAvatarId(request.getAvatarId());
+        }
         userRepository.save(currentUser);
         return getUserRes(currentUser);
 
@@ -221,7 +222,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         if (userIds.contains(user.getId())) {
             throw new BusinessException(Translator.toLocale("can_not_delete_myself"), HttpStatus.BAD_REQUEST);
         }
-        List<Integer> existingIds = userRepository.getAllIdToCheckExist(userIds, user.getRole());
+        List<Integer> existingIds = userRepository.getAllIdToCheckExist(userIds);
         List<Integer> nonExistingIds = userIds.stream().filter(id -> !existingIds.contains(id)).toList();
         if (!nonExistingIds.isEmpty()) {
             throw new BusinessException(Translator.toLocale("id_not_exist"), HttpStatus.BAD_REQUEST);
@@ -233,7 +234,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Override
     public void changePasswordMember(ChangePasswordUserReq request) {
         User user = getUser(PermissionKey.CREATE, PermissionType.ACCOUNT);
-        User currentUser = userRepository.getUserToUpdate(request.getUserId(), user.getRole());
+        User currentUser = userRepository.getUserToUpdate(request.getUserId());
         if (currentUser == null) {
             throw new BusinessException(Translator.toLocale("user_id_not_exist"));
         }
@@ -306,25 +307,31 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     private UserDetailRes getUserRes(User user) {
         RoleDetail roleDetail;
+        UploadFileRes uploadFileRes = new UploadFileRes();
         if (user.getRole() == null) {
             roleDetail = roleRepository.getRoleById(user.getRoleId());
         } else {
             roleDetail = new RoleDetail();
             roleDetail.setRoleId(user.getRole().getId());
             roleDetail.setRoleType(user.getRole().getType());
-            roleDetail.setObjectId(user.getRole().getObjectId());
             roleDetail.setRoleName(user.getRole().getName());
+        }
+        if(user.getAvatarId() != null) {
+            uploadFileRes.setOriginUrl(mediaRepository.findUploadFileById(user.getAvatarId()).getOriginUrl());
+            uploadFileRes.setThumbUrl(mediaRepository.findUploadFileById(user.getAvatarId()).getThumbUrl());
         }
         return UserDetailRes.builder()
                 .id(user.getId())
                 .code(user.getCode())
                 .name(user.getName())
+                .avatarId(user.getAvatarId())
                 .phone(user.getPhone())
                 .email(user.getEmail())
                 .role(roleDetail)
                 .birthday(user.getBirthday())
                 .gender(user.getGender())
                 .permissions(roleRepository.getPermissions(user.getRoleId(), user.getRole()))
+                .avatar(uploadFileRes)
                 .build();
     }
 

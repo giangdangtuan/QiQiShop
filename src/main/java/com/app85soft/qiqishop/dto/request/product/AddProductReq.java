@@ -1,7 +1,8 @@
 package com.app85soft.qiqishop.dto.request.product;
 
 import com.app85soft.qiqishop.dto.constant.ActiveStatus;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.app85soft.qiqishop.dto.request.model.AddModelReq;
+import com.app85soft.qiqishop.dto.request.model.VariantOptionReq;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -28,19 +29,8 @@ public class AddProductReq {
     int stock;
     ActiveStatus status;
 
-    List<Model> models;
+    List<VariantOptionReq> variantOptions;
+    List<AddModelReq> models;
 
-    @Data
-    @FieldDefaults(level = AccessLevel.PRIVATE)
-    public static class Model {
-        String code;
-        String name;
-        Integer productId;
-        Integer coverImage;
-
-        boolean hasDiscount;
-        int discountPercentage;
-        BigDecimal price;
-        int stock;
-    }
+    List<ProductImageReq> images;
 }

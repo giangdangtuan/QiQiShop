@@ -2,18 +2,27 @@ package com.app85soft.qiqishop.repositories.product;
 
 import com.app85soft.qiqishop.dto.constant.ActiveStatus;
 import com.app85soft.qiqishop.dto.response.model.ModelRes;
+import com.app85soft.qiqishop.dto.response.model.VariantOptionRes;
+import com.app85soft.qiqishop.dto.response.model.VariantValueRes;
+import com.app85soft.qiqishop.dto.response.product.ProductDetailRes;
+import com.app85soft.qiqishop.dto.response.product.ProductImageRes;
 import com.app85soft.qiqishop.dto.response.product.ProductRes;
 import com.app85soft.qiqishop.entities.model.QModel;
+import com.app85soft.qiqishop.entities.model.QVariantOption;
+import com.app85soft.qiqishop.entities.model.QVariantValue;
 import com.app85soft.qiqishop.entities.product.Product;
 import com.app85soft.qiqishop.entities.product.QProduct;
+import com.app85soft.qiqishop.entities.product.QProductImage;
 import com.app85soft.qiqishop.entities.promotion.QPromotion;
 import com.app85soft.qiqishop.entities.promotion.QPromotionModel;
+import com.app85soft.qiqishop.entities.upload_file.QUploadFile;
 import com.app85soft.qiqishop.repositories.BaseRepository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -22,11 +31,16 @@ import java.util.stream.Collectors;
 import static com.app85soft.qiqishop.util.Constants.PAGE_SIZE;
 
 @Slf4j
+@Repository
 public class ProductRepositoryImpl extends BaseRepository implements ProductRepositoryCustom {
     private final QProduct qProduct = QProduct.product;
     private final QModel qModel = QModel.model;
     private final QPromotion qPromotion = QPromotion.promotion;
     private final QPromotionModel qPromotionModel = QPromotionModel.promotionModel;
+    private final QProductImage qProductImage = QProductImage.productImage;
+    private final QVariantOption qVariantOption = QVariantOption.variantOption;
+    private final QVariantValue qVariantValue = QVariantValue.variantValue;
+    private final QUploadFile qUploadFile = QUploadFile.uploadFile;
 
     @Override
     public boolean existsByCode(String code) {
@@ -91,6 +105,8 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
         }
 
         List<ProductRes> products = query().from(qProduct)
+                .leftJoin(qUploadFile).on(qUploadFile.id.eq(qProduct.coverImage)
+                        .and(qUploadFile.deleted.eq(false)))
                 .where(builder)
                 .orderBy(qProduct.id.desc())
                 .offset(page * PAGE_SIZE)
@@ -101,6 +117,7 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
                         qProduct.name,
                         qProduct.categoryId,
                         qProduct.coverImage,
+                        qUploadFile.originUrl.as("imageUrl"),
                         qProduct.weight,
                         qProduct.description,
                         qProduct.status
@@ -129,15 +146,18 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
 
 
     @Override
-    public ProductRes getProductDetail(int productId) {
-        ProductRes product = query().from(qProduct)
+    public ProductDetailRes getProductDetail(int productId) {
+        ProductDetailRes product = query().from(qProduct)
+                .leftJoin(qUploadFile).on(qUploadFile.id.eq(qProduct.coverImage)
+                        .and(qUploadFile.deleted.eq(false)))
                 .where(qProduct.id.eq(productId).and(qProduct.deleted.eq(false)))
-                .select(Projections.fields(ProductRes.class,
+                .select(Projections.fields(ProductDetailRes.class,
                         qProduct.id,
                         qProduct.code,
                         qProduct.name,
                         qProduct.categoryId,
                         qProduct.coverImage,
+                        qUploadFile.originUrl.as("imageUrl"),
                         qProduct.weight,
                         qProduct.description,
                         qProduct.status
@@ -148,8 +168,46 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
             return null;
         }
 
+        List<VariantOptionRes> variantOptions = query().from(qVariantOption)
+                .where(qVariantOption.productId.eq(productId)
+                        .and(qVariantOption.deleted.eq(false)))
+                .select(Projections.fields(VariantOptionRes.class,
+                        qVariantOption.id,
+                        qVariantOption.name
+                ))
+                .fetch();
+
+        for (VariantOptionRes option : variantOptions) {
+            List<VariantValueRes> values = query().from(qVariantValue)
+                    .where(qVariantValue.optionTypeId.eq(option.getId())
+                            .and(qVariantValue.deleted.eq(false)))
+                    .select(Projections.fields(VariantValueRes.class,
+                            qVariantValue.id,
+                            qVariantValue.value
+                    ))
+                    .fetch();
+            option.setValues(values);
+        }
+
+        product.setVariantOptions(variantOptions);
+
         List<ModelRes> models = getModelsWithPromotion(productId);
         product.setModels(models);
+
+        List<ProductImageRes> productImageRes = query().from(qProductImage)
+                .leftJoin(qUploadFile).on(qUploadFile.id.eq(qProductImage.imageId)
+                        .and(qUploadFile.deleted.eq(false)))
+                .where(qProductImage.productId.eq(productId)
+                        .and(qProductImage.deleted.eq(false)))
+                .select(Projections.fields(ProductImageRes.class,
+                        qProductImage.productId,
+                        qProductImage.imageId,
+                        qUploadFile.originUrl.as("imageUrl"),
+                        qProductImage.sortOrder
+                ))
+                .fetch();
+
+        product.setProductImages(productImageRes);
 
         return product;
     }
@@ -164,6 +222,8 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
         if (categoryId != null) builder.and(qProduct.categoryId.eq(categoryId));
 
         List<ProductRes> products = query().from(qProduct)
+                .leftJoin(qUploadFile).on(qUploadFile.id.eq(qProduct.coverImage)
+                        .and(qUploadFile.deleted.eq(false)))
                 .where(builder)
                 .orderBy(qProduct.id.desc())
                 .offset(page * PAGE_SIZE)
@@ -174,6 +234,7 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
                         qProduct.name,
                         qProduct.categoryId,
                         qProduct.coverImage,
+                        qUploadFile.originUrl.as("imageUrl"),
                         qProduct.weight,
                         qProduct.description,
                         qProduct.status
@@ -204,8 +265,10 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
                         qModel.id,
                         qModel.code,
                         qModel.productId,
+                        qModel.optionValue1Id,
+                        qModel.optionValue2Id,
                         qModel.name,
-                        qModel.coverImage,
+//                        qModel.coverImage,
                         qModel.price.as("originalPrice"),
                         Expressions.cases()
                                 .when(promotionCondition)
@@ -313,10 +376,13 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
                 .where(qModel.productId.eq(productId)
                         .and(qModel.deleted.eq(false)))
                 .select(Projections.fields(ModelRes.class,
+                        qModel.id,
                         qModel.code,
                         qModel.productId,
+                        qModel.optionValue1Id,
+                        qModel.optionValue2Id,
                         qModel.name,
-                        qModel.coverImage,
+//                        qModel.coverImage,
                         qModel.price.as("originalPrice"),
                         Expressions.cases()
                                 .when(promotionCondition)

@@ -20,7 +20,6 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RoleRes {
     int id;
-    Integer objectId;
     String name;
     String note;
     RoleType type;
@@ -31,7 +30,6 @@ public class RoleRes {
     public static RoleRes convertObject(Role role) {
         RoleRes roleRes = new RoleRes();
         roleRes.setId(role.getId());
-        roleRes.setObjectId(role.getObjectId());
         roleRes.setNote(role.getNote());
         roleRes.setName(role.getName());
         roleRes.setStatus(role.getStatus());

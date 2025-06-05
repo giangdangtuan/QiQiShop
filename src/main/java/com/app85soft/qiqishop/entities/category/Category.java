@@ -24,6 +24,8 @@ import lombok.experimental.FieldDefaults;
 @Table(name = "category")
 public class Category extends BaseEntity {
     String name;
+
+    Integer coverImage;
     @Column(name = "status", columnDefinition = "INT")
     ActiveStatus status;
     boolean deleted;

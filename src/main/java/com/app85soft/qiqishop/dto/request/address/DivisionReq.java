@@ -9,5 +9,6 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class DivisionReq {
-    int parentId;
+    Integer parentId;
+    Integer level;
 }

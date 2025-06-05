@@ -11,6 +11,8 @@ public interface CategoryRepositoryCustom {
     boolean existsByName(String name, Integer id);
 
     List<CategoryListRes> getCategories();
+
+    CategoryListRes getCategoryDetail(int id);
     
     Category getCategoryToUpdate(int categoryId);
 

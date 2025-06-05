@@ -17,6 +17,8 @@ import lombok.experimental.FieldDefaults;
 public class CategoryListRes {
     int id;
     String name;
+    Integer coverImage;
+    String imageUrl;
     ActiveStatus status;
 
 }

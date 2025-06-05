@@ -32,7 +32,7 @@ public class CategoryServicelmpl extends BaseService implements CategoryService 
     private final ProductRepository productRepository;
 
     public BaseResponse<List<CategoryListRes>> getCategories() {
-        User user = getUser(PermissionKey.READ, PermissionType.PRODUCT);
+//        User user = getUser(PermissionKey.READ, PermissionType.PRODUCT);
 
         long count = categoryRepository.countCategory();
         List<CategoryListRes> categories = categoryRepository.getCategories();
@@ -47,6 +47,7 @@ public class CategoryServicelmpl extends BaseService implements CategoryService 
         }
         Category newCategory = new Category();
         newCategory.setName(request.getName());
+        newCategory.setCoverImage(request.getCoverImage());
         newCategory.setStatus(ActiveStatus.ACTIVE);
 
         return categoryRepository.save(newCategory);
@@ -72,7 +73,18 @@ public class CategoryServicelmpl extends BaseService implements CategoryService 
      }
 
     @Override
-    public List<CategoryListRes>  updateCategory(UpdateCategoryReq request) {
+    public CategoryListRes getCategoryDetail(int catId) {
+        User user = getUser(PermissionKey.READ, PermissionType.PRODUCT);
+        CategoryListRes category = categoryRepository.getCategoryDetail(catId);
+        if (category == null) {
+            throw new BusinessException(Translator.toLocale("id_not_exist"), HttpStatus.BAD_REQUEST);
+        }
+
+        return category;
+    }
+
+    @Override
+    public CategoryListRes  updateCategory(UpdateCategoryReq request) {
         User user = getUser(PermissionKey.CREATE, PermissionType.PRODUCT);
         Category currentCategory = categoryRepository.getCategoryToUpdate(request.getId());
         if (currentCategory == null) {
@@ -84,13 +96,12 @@ public class CategoryServicelmpl extends BaseService implements CategoryService 
         if (request.getName() != null && !request.getName().isEmpty()) {
             currentCategory.setName(request.getName());
         }
+        if (request.getCoverImage() != null && request.getCoverImage() != 0) {
+            currentCategory.setCoverImage(request.getCoverImage());
+        }
         categoryRepository.save(currentCategory);
-        List<Category> categories = categoryRepository.findAll();
 
-        List<CategoryListRes> categoryListRes = categories.stream()
-                .map(category -> new CategoryListRes(category.getId(), category.getName(), category.getStatus()))
-                .collect(Collectors.toList());
-        return categoryListRes;
+        return categoryRepository.getCategoryDetail(currentCategory.getId());
     }
 
 }

@@ -1,6 +1,7 @@
 package com.app85soft.qiqishop.dto.response.user;
 
 import com.app85soft.qiqishop.dto.constant.ActiveStatus;
+import com.app85soft.qiqishop.dto.response.file.UploadFileRes;
 import com.app85soft.qiqishop.dto.response.permission.PermissionRes;
 import com.app85soft.qiqishop.dto.response.role.RoleDetail;
 import com.app85soft.qiqishop.entities.user.constant.Gender;
@@ -28,5 +29,5 @@ public class UserDetailRes {
     RoleDetail role;
     List<PermissionRes> permissions;
     String accessToken;
-
+    UploadFileRes avatar;
 }

@@ -2,11 +2,12 @@ package com.app85soft.qiqishop.controller;
 
 import com.app85soft.qiqishop.dto.request.IdsRequest;
 import com.app85soft.qiqishop.dto.request.address.AddAddressReq;
+import com.app85soft.qiqishop.dto.request.address.SetDefaultAddressReq;
 import com.app85soft.qiqishop.dto.request.address.UpdateAddressReq;
 import com.app85soft.qiqishop.dto.response.BaseResponse;
 import com.app85soft.qiqishop.dto.response.address.AddressRes;
 import com.app85soft.qiqishop.dto.response.address.DivisionRes;
-import com.app85soft.qiqishop.dto.response.cart.CartRes;
+import com.app85soft.qiqishop.entities.address.Address;
 import com.app85soft.qiqishop.services.address.AddressService;
 import com.app85soft.qiqishop.services.address.DivisionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -58,7 +59,15 @@ public class AddressController {
 
     @Operation(summary = "Get list division.")
     @GetMapping("v1/division/list")
-    public ResponseEntity<BaseResponse<List<DivisionRes>>> getDivisions(@RequestParam(required = false) Integer parentId) {
-        return ResponseEntity.ok(new BaseResponse<>(divisionService.getDivisions(parentId)));
+    public ResponseEntity<BaseResponse<List<DivisionRes>>> getDivisions(@RequestParam(required = false) Integer parentId,
+                                                                        @RequestParam int level) {
+        return ResponseEntity.ok(new BaseResponse<>(divisionService.getDivisions(parentId, level)));
     }
+
+    @Operation(summary = "Set default address")
+    @PostMapping("v1/address/set-default")
+    public ResponseEntity<BaseResponse<Address>> setDefaultAddress(@RequestBody @Valid SetDefaultAddressReq req) {
+        return ResponseEntity.ok(new BaseResponse<>(addressService.setDefaultAddress(req)));
+    }
+
 }

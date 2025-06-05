@@ -14,6 +14,8 @@ public class ModelRes {
     int id;
     String code;
     Integer productId;
+    Integer optionValue1Id;
+    Integer optionValue2Id;
     String name;
     Integer coverImage;
     BigDecimal originalPrice;
