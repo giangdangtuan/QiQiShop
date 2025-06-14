@@ -1,5 +1,6 @@
 package com.app85soft.qiqishop.dto.response.payment;
 
+import com.app85soft.qiqishop.dto.constant.PaymentGateway;
 import com.app85soft.qiqishop.dto.constant.PaymentMethod;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
@@ -16,6 +17,7 @@ import java.math.BigDecimal;
 public class ConfirmCheckOutRes {
     String orderCode;
     BigDecimal totalAmount;
-    PaymentMethod paymentMethod;
+    PaymentGateway paymentGateway;
     String paymentUrl;
+    String note;
 }

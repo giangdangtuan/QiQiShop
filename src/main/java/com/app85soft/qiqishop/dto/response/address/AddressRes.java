@@ -27,18 +27,15 @@ public class AddressRes {
     String detailAddress;
     boolean isDefault;
 
-    public AddressRes(int id, int userId, String consignee, String phone, int provinceId,
-                      String provinceName, int districtId, String districtName, int wardId, String wardName,
+    public AddressRes(int id, int userId, String consignee, String phone,
+                      String provinceName, String districtName, String wardName,
                       String detailAddress, boolean isDefault) {
         this.id = id;
         this.userId = userId;
         this.consignee = consignee;
         this.phone = phone;
-        this.provinceId = provinceId;
         this.provinceName = provinceName;
-        this.districtId = districtId;
         this.districtName = districtName;
-        this.wardId = wardId;
         this.wardName = wardName;
         this.detailAddress = detailAddress;
         this.isDefault = isDefault;

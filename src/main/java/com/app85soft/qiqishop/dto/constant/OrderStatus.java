@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "Trạng thái đơn hàng", type = "integer")
 public enum OrderStatus implements BaseEnum<Integer> {
-    WAITING_FOR_CONFIMATION(0),
+    PENDING(0),
     READY_TO_PICK(1),
     PICKING(2),
     CANCEL(3),

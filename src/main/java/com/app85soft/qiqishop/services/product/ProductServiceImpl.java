@@ -33,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -394,10 +395,10 @@ public class ProductServiceImpl extends BaseService implements ProductService {
     }
 
     @Override
-    public BaseResponse<List<ProductRes>> getProducts(ActiveStatus status, String name, Integer categoryId, int page) {
+    public BaseResponse<List<ProductRes>> getProducts(ActiveStatus status, String name, Integer categoryId, BigDecimal startPrice, BigDecimal endPrice, String sortBy, int page) {
 //        User user = getUser(PermissionKey.READ, PermissionType.PRODUCT);
-        long countProduct = productRepository.countProduct(status, name, categoryId);
-        List<ProductRes> listProducts = productRepository.getProduct(status, name, categoryId, page);
+        long countProduct = productRepository.countProduct(status, name, categoryId, startPrice, endPrice);
+        List<ProductRes> listProducts = productRepository.getProduct(status, name, categoryId, startPrice, endPrice, sortBy, page);
         return new BaseResponse<>(listProducts, countProduct, page);
     }
 

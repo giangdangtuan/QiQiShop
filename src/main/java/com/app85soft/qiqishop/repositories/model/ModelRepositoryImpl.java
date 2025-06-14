@@ -73,6 +73,7 @@ public class ModelRepositoryImpl extends BaseRepository implements ModelReposito
     public void decreaseStock(int modelId, int quantity) {
         query().update(qModel)
                 .set(qModel.stock, qModel.stock.subtract(quantity))
+                .set(qModel.soldCount, qModel.soldCount.add(quantity))
                 .where(qModel.id.eq(modelId).and(qModel.stock.goe(quantity)))
                 .execute();
     }

@@ -338,7 +338,9 @@ CREATE TABLE `orders`
     `address_id`          int unsigned    NOT NULL COMMENT 'Khóa ngoại tham chiếu đến địa chỉ',
     `code`                varchar(50)     NOT NULL COMMENT 'Mã người dùng duy nhất',
     `total_price`         DECIMAL(10, 2)  NOT NULL COMMENT 'Tổng tiền hóa đơn',
+    `note`                varchar(255)             DEFAULT NULL COMMENT 'Ghi chú đơn hàng',
     `payment_method`      int                      DEFAULT '0',
+    `shipping_cost`       DECIMAL(10, 2)  NOT NULL COMMENT 'Tiền ship',
     `status`              int             NOT NULL COMMENT 'Trạng thái',
     `deleted`             bit             NOT NULL DEFAULT 0 COMMENT 'Đánh dấu trạng thái xóa của bản ghi: `0`: Chưa xóa, `1`: Đã xóa',
     `created_at`          datetime        NOT NULL,
@@ -369,7 +371,6 @@ CREATE TABLE `order_detail`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci;
 
-
 CREATE TABLE `transactions`
 (
     `id`              int unsigned          NOT NULL AUTO_INCREMENT,
@@ -396,6 +397,68 @@ CREATE TABLE `transactions`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci;
 
+CREATE TABLE `purchase_orders` (
+    `id`            int UNSIGNED    NOT NULL AUTO_INCREMENT,
+    `code`          VARCHAR(50)     NOT NULL UNIQUE COMMENT 'Mã phiếu nhập',
+    `user_id`       int unsigned    NOT NULL COMMENT 'Khóa ngoại tham chiếu đến người dùng',
+    `note`          TEXT                     DEFAULT NULL,
+    `deleted`       bit(1)          NOT NULL DEFAULT b'0',
+    `created_at`    datetime        NOT NULL,
+    `updated_at`    datetime        NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE = InnoDB COMMENT 'Phiếu nhập'
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
+CREATE TABLE `purchase_order_items` (
+    `id`                    int UNSIGNED     NOT NULL AUTO_INCREMENT,
+    `purchase_order_id`     int UNSIGNED     NOT NULL,
+    `model_id`              INT UNSIGNED     NOT NULL COMMENT 'Tham chiếu đến model',
+    `quantity`              INT NOT NULL,
+    `unit_cost`             DECIMAL(10, 2)   NOT NULL COMMENT 'Giá nhập/lô',
+    `deleted`               bit(1)           NOT NULL DEFAULT b'0',
+    `created_at`            DATETIME         NOT NULL,
+    `updated_at`            DATETIME         NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`purchase_order_id`) REFERENCES `purchase_orders` (`id`),
+    FOREIGN KEY (`model_id`) REFERENCES `model` (`id`)
+) ENGINE = InnoDB COMMENT 'Chi tiết phiếu nhập'
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
+CREATE TABLE `stock_batches` (
+    `id`                        int UNSIGNED   NOT NULL AUTO_INCREMENT,
+    `model_id`                  INT UNSIGNED   NOT NULL,
+    `purchase_order_item_id`    int UNSIGNED,
+    `quantity_received`         INT            NOT NULL,
+    `quantity_remaining`        INT            NOT NULL,
+    `unit_cost`                 DECIMAL(10, 2) NOT NULL,
+    `deleted`                   bit(1)         NOT NULL DEFAULT b'0',
+    `created_at`                DATETIME       NOT NULL,
+    `updated_at`                DATETIME       NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`model_id`) REFERENCES `model` (`id`),
+    FOREIGN KEY (`purchase_order_item_id`) REFERENCES `purchase_order_items` (`id`)
+) ENGINE = InnoDB COMMENT 'Chi tiết phiếu nhập'
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
+CREATE TABLE `order_detail_batches`
+(
+    `id`                    int unsigned      NOT NULL AUTO_INCREMENT,
+    `order_detail_id`       int UNSIGNED      NOT NULL,
+    `stock_batch_id`        INT UNSIGNED      NOT NULL,
+    `quantity_allocated`    INT               NOT NULL,
+    `deleted`         bit(1)                  NOT NULL DEFAULT b'0',
+    `created_at`            datetime          NOT NULL,
+    `updated_at`            datetime          NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`order_detail_id`) REFERENCES `order_detail`(`id`),
+    FOREIGN KEY (`stock_batch_id`) REFERENCES `stock_batches`(`id`)
+) ENGINE = InnoDB COMMENT 'Lấy theo lô nào'
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE `ratings`
 (

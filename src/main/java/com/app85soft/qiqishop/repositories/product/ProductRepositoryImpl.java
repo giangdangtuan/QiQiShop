@@ -18,13 +18,16 @@ import com.app85soft.qiqishop.entities.promotion.QPromotionModel;
 import com.app85soft.qiqishop.entities.upload_file.QUploadFile;
 import com.app85soft.qiqishop.repositories.BaseRepository;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPQLQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -70,7 +73,7 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
     }
 
     @Override
-    public long countProduct(ActiveStatus status, String searchKeyword, Integer categoryId) {
+    public long countProduct(ActiveStatus status, String searchKeyword, Integer categoryId, BigDecimal startPrice, BigDecimal endPrice) {
         BooleanBuilder builder = new BooleanBuilder();
         if (status != null) {
             builder.and(qProduct.status.eq(status));
@@ -83,6 +86,17 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
         if(categoryId != null) {
             builder.and(qProduct.categoryId.eq(categoryId));
         }
+        if (startPrice != null || endPrice != null) {
+            JPQLQuery<Integer> subQuery = query().select(qModel.productId).from(qModel);
+            if (startPrice != null) {
+                subQuery.where(qModel.price.goe(startPrice));
+            }
+            if (endPrice != null) {
+                subQuery.where(qModel.price.loe(endPrice));
+            }
+            builder.and(qProduct.id.in(subQuery));
+        }
+
         Long count = query().from(qProduct)
                 .where(builder)
                 .select(qProduct.id.count())
@@ -91,7 +105,8 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
     }
 
     @Override
-    public List<ProductRes> getProduct(ActiveStatus status, String searchKeyword, Integer categoryId, int page) {
+    public List<ProductRes> getProduct(ActiveStatus status, String searchKeyword, Integer categoryId,
+                                       BigDecimal startPrice, BigDecimal endPrice, String sortBy, int page) {
         BooleanBuilder builder = new BooleanBuilder();
         if (status != null) {
             builder.and(qProduct.status.eq(status));
@@ -103,8 +118,25 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
         if (categoryId != null) {
             builder.and(qProduct.categoryId.eq(categoryId));
         }
+        if (startPrice != null || endPrice != null) {
+            BooleanBuilder priceBuilder = new BooleanBuilder();
+            if (startPrice != null) {
+                priceBuilder.and(qModel.price.goe(startPrice));
+            }
+            if (endPrice != null) {
+                priceBuilder.and(qModel.price.loe(endPrice));
+            }
+
+            JPQLQuery<Integer> subQuery = query()
+                    .select(qModel.productId)
+                    .from(qModel)
+                    .where(priceBuilder);
+
+            builder.and(qProduct.id.in(subQuery));
+        }
 
         List<ProductRes> products = query().from(qProduct)
+                .join(qModel).on(qModel.productId.eq(qProduct.id))
                 .leftJoin(qUploadFile).on(qUploadFile.id.eq(qProduct.coverImage)
                         .and(qUploadFile.deleted.eq(false)))
                 .where(builder)

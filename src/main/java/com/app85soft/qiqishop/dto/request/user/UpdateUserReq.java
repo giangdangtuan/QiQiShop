@@ -17,8 +17,6 @@ public class UpdateUserReq extends EditMyProfileReq{
     int userId;
     @NotBlank
     String phone;
-    @Email
-    String email;
     Integer roleId;
     ActiveStatus status;
 

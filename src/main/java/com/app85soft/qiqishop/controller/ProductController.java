@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -33,8 +34,14 @@ public class ProductController {
                                                                       @Parameter(description = "[name]")
                                                                       @RequestParam(required = false) String searchKeyword,
                                                                       @Parameter(description = "[category]")
-                                                                      @RequestParam(required = false) Integer catgoryId) {
-        return ResponseEntity.ok(productService.getProducts(status, searchKeyword, catgoryId, page));
+                                                                      @RequestParam(required = false) Integer catgoryId,
+                                                                      @Parameter(description = "[category]")
+                                                                      @RequestParam(required = false) BigDecimal startPrice,
+                                                                      @Parameter(description = "[category]")
+                                                                      @RequestParam(required = false) BigDecimal endPrice,
+                                                                      @Parameter(description = "[category]")
+                                                                      @RequestParam(required = false) String sortBy) {
+        return ResponseEntity.ok(productService.getProducts(status, searchKeyword, catgoryId, startPrice, endPrice, sortBy, page));
     }
 
 

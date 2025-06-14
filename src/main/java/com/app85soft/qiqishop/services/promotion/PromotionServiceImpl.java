@@ -67,7 +67,7 @@ public class PromotionServiceImpl extends BaseService implements PromotionServic
         }
         promotionModelRepository.saveAll(promotionModels);
 
-        return getPromotionRes(promotion, promotionModels);
+        return getPromotionRes(promotion);
     }
 
 
@@ -118,7 +118,7 @@ public class PromotionServiceImpl extends BaseService implements PromotionServic
         }
         promotionModelRepository.saveAll(updatedPromotionModels);
 
-        PromotionRes promotionRes = getPromotionRes(promotion, updatedPromotionModels);
+        PromotionRes promotionRes = getPromotionRes(promotion);
         return promotionRes;
     }
 
@@ -169,7 +169,7 @@ public class PromotionServiceImpl extends BaseService implements PromotionServic
         return new BaseResponse<>(promotion);
     }
 
-    private PromotionRes getPromotionRes(Promotion promotion, List<PromotionModel> promotionModels) {
+    private PromotionRes getPromotionRes(Promotion promotion) {
 
         return PromotionRes.builder()
                 .id(promotion.getId())

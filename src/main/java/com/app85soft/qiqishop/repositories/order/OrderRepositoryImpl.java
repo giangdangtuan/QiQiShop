@@ -15,6 +15,7 @@ import com.app85soft.qiqishop.entities.order.QOrder;
 import com.app85soft.qiqishop.entities.order.QOrderDetail;
 import com.app85soft.qiqishop.entities.product.QProduct;
 import com.app85soft.qiqishop.entities.rating.QRating;
+import com.app85soft.qiqishop.entities.upload_file.QUploadFile;
 import com.app85soft.qiqishop.entities.user.QUser;
 import com.app85soft.qiqishop.repositories.BaseRepository;
 import com.querydsl.core.BooleanBuilder;
@@ -39,6 +40,7 @@ public class OrderRepositoryImpl extends BaseRepository implements OrderReposito
     private final QWard qWard = QWard.ward;
     private final QUser qUser = QUser.user;
     private final QRating qRating = QRating.rating;
+    private final QUploadFile qUploadFile = QUploadFile.uploadFile;
 
     @Override
     public long countOrder(OrderStatus status, String orderCode, PaymentMethod paymentMethod) {
@@ -86,6 +88,8 @@ public class OrderRepositoryImpl extends BaseRepository implements OrderReposito
                         qUser.name.as("userName"),
                         qOrder.totalPrice,
                         qOrder.paymentMethod,
+                        qOrder.shippingCost,
+                        qOrder.note,
                         qOrder.status
                 ))
                 .from(qOrder)
@@ -115,11 +119,14 @@ public class OrderRepositoryImpl extends BaseRepository implements OrderReposito
                             qProduct.coverImage.as("productImage"),
                             qOrderDetail.amount,
                             qOrderDetail.originalPrice,
-                            qOrderDetail.finalPrice
+                            qOrderDetail.finalPrice,
+                            qUploadFile.originUrl.as("originUrl"),
+                            qUploadFile.thumbUrl.as("thumbUrl")
                     ))
                     .from(qOrderDetail)
                     .leftJoin(qModel).on(qOrderDetail.modelId.eq(qModel.id))
                     .leftJoin(qProduct).on(qModel.productId.eq(qProduct.id))
+                    .leftJoin(qUploadFile).on(qProduct.coverImage.eq(qUploadFile.id))
                     .where(qOrderDetail.orderId.eq(order.getId())
                             .and(qOrderDetail.deleted.eq(false)))
                     .fetch();
@@ -131,7 +138,7 @@ public class OrderRepositoryImpl extends BaseRepository implements OrderReposito
     }
 
     @Override
-    public OrderRes getOrder(String code) {
+    public OrderRes getOrder(int orderId) {
         OrderRes order = query()
                 .select(Projections.constructor(OrderRes.class,
                         qOrder.id,
@@ -140,6 +147,8 @@ public class OrderRepositoryImpl extends BaseRepository implements OrderReposito
                         qUser.name.as("userName"),
                         qOrder.totalPrice,
                         qOrder.paymentMethod,
+                        qOrder.shippingCost,
+                        qOrder.note,
                         qOrder.status,
                         Projections.constructor(AddressRes.class,
                                 qAddress.id,
@@ -158,23 +167,26 @@ public class OrderRepositoryImpl extends BaseRepository implements OrderReposito
                 .leftJoin(qProvince).on(qAddress.provinceId.eq(qProvince.id))
                 .leftJoin(qDistrict).on(qAddress.districtId.eq(qDistrict.id))
                 .leftJoin(qWard).on(qAddress.wardId.eq(qWard.id))
-                .where(qOrder.code.eq(code))
+                .where(qOrder.id.eq(orderId))
                 .fetchOne();
 
         List<OrderDertailRes> orderDetails = query()
                 .select(Projections.constructor(OrderDertailRes.class,
                         qOrderDetail.id,
-                        qModel.id,
-                        qModel.name,
-                        qProduct.name,
+                        qModel.id.as("modelId"),
+                        qModel.name.as("modelName"),
+                        qProduct.name.as("productName"),
                         qProduct.coverImage.as("productImage"),
                         qOrderDetail.amount,
                         qOrderDetail.originalPrice,
-                        qOrderDetail.finalPrice
+                        qOrderDetail.finalPrice,
+                        qUploadFile.originUrl.as("originUrl"),
+                        qUploadFile.thumbUrl.as("thumbUrl")
                 ))
                 .from(qOrderDetail)
                 .leftJoin(qModel).on(qOrderDetail.modelId.eq(qModel.id))
                 .leftJoin(qProduct).on(qModel.productId.eq(qProduct.id))
+                .leftJoin(qUploadFile).on(qProduct.coverImage.eq(qUploadFile.id))
                 .where(qOrderDetail.orderId.eq(order.getId())
                         .and(qOrderDetail.deleted.eq(false)))
                 .fetch();

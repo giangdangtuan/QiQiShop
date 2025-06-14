@@ -5,6 +5,7 @@ import com.app85soft.qiqishop.dto.response.product.ProductDetailRes;
 import com.app85soft.qiqishop.dto.response.product.ProductRes;
 import com.app85soft.qiqishop.entities.product.Product;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface ProductRepositoryCustom {
@@ -13,9 +14,9 @@ public interface ProductRepositoryCustom {
 
     boolean existsByName(String name, Integer id);
 
-    long countProduct(ActiveStatus status, String searchKeyword, Integer categoryId);
+    long countProduct(ActiveStatus status, String searchKeyword, Integer categoryId, BigDecimal startPrice, BigDecimal endPrice);
 
-    List<ProductRes> getProduct(ActiveStatus status, String searchKeyword, Integer categoryId, int page);
+    List<ProductRes> getProduct(ActiveStatus status, String searchKeyword, Integer categoryId, BigDecimal startPrice, BigDecimal endPrice, String sortBy, int page);
 
     List<ProductRes> getProductSale(ActiveStatus status, String searchKeyword, Integer categoryId, int page);
 

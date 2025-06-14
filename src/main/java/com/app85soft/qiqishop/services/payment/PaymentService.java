@@ -12,5 +12,5 @@ import java.util.List;
 public interface PaymentService {
     BaseResponse<CheckOutRes> checkOut(CheckOutReq req);
     BaseResponse<ConfirmCheckOutRes> confirmCheckOut(ConfirmCheckOutReq req);
-    void handleVnPaySuccess(String orderCode, int addressId, BigDecimal totalAmount, List<Integer> cartItemIds, int userId, String referenceCode, long payDate);
+    void handleVnPaySuccess(String orderCode, int addressId, BigDecimal totalAmount, List<Integer> cartItemIds, int userId, String referenceCode, long payDate, String note, BigDecimal shippingCost);
 }

@@ -16,6 +16,8 @@ import com.app85soft.qiqishop.dto.response.payment.CheckOutRes;
 import com.app85soft.qiqishop.dto.response.payment.ConfirmCheckOutRes;
 import com.app85soft.qiqishop.entities.order.Order;
 import com.app85soft.qiqishop.entities.order.OrderDetail;
+import com.app85soft.qiqishop.entities.order.OrderDetailBatch;
+import com.app85soft.qiqishop.entities.purchase_orders.StockBatch;
 import com.app85soft.qiqishop.entities.transaction.Transactions;
 import com.app85soft.qiqishop.entities.user.User;
 import com.app85soft.qiqishop.exceptions.BusinessException;
@@ -23,8 +25,10 @@ import com.app85soft.qiqishop.external.GhnClient;
 import com.app85soft.qiqishop.repositories.address.AddressRepository;
 import com.app85soft.qiqishop.repositories.cart_item.CartItemRepository;
 import com.app85soft.qiqishop.repositories.model.ModelRepository;
+import com.app85soft.qiqishop.repositories.order.OrderDetailBatchRepository;
 import com.app85soft.qiqishop.repositories.order.OrderDetailRepository;
 import com.app85soft.qiqishop.repositories.order.OrderRepository;
+import com.app85soft.qiqishop.repositories.stock_batch.StockBatchRepository;
 import com.app85soft.qiqishop.repositories.transaction.TransactionRepository;
 import com.app85soft.qiqishop.services.BaseService;
 import com.app85soft.qiqishop.services.vnpay.VnpayService;
@@ -47,6 +51,8 @@ public class PaymentServiceImpl extends BaseService implements PaymentService {
     private final OrderDetailRepository orderDetailRepository;
     private final TransactionRepository transactionRepository;
     private final ModelRepository modelRepository;
+    private final StockBatchRepository stockBatchRepository;
+    private final OrderDetailBatchRepository orderDetailBatchRepository;
 
     @Override
     public BaseResponse<CheckOutRes> checkOut(CheckOutReq req) {
@@ -83,16 +89,18 @@ public class PaymentServiceImpl extends BaseService implements PaymentService {
         }
 
         String orderCode = "OD" + System.currentTimeMillis();
-        PaymentMethod method = req.getPaymentMethod();
+        PaymentGateway gateway = req.getPaymentGateway();
         String paymentUrl = null;
 
-        if (method == PaymentMethod.CASH_ON_DELIVERY) {
+        if (gateway == PaymentGateway.CASH) {
             OrderReq orderReq = OrderReq.builder()
                     .userId(user.getId())
                     .addressId(req.getAddressId())
                     .code(orderCode)
                     .totalPrice(totalAmount)
                     .paymentMethod(PaymentMethod.CASH_ON_DELIVERY)
+                    .shippingCost(shippingFee)
+                    .note(req.getNote())
                     .status(0)
                     .build();
 
@@ -114,9 +122,9 @@ public class PaymentServiceImpl extends BaseService implements PaymentService {
                     .toList();
             cartItemRepository.deleteAllByIdsAndUserId(cartItemIds, user.getId());
 
-        } else if (method == PaymentMethod.BANK_TRANSFER) {
+        } else if (gateway == PaymentGateway.VNPAY) {
             List<Integer> itemIds = items.stream().map(CartRes.CartItemRes::getId).toList();
-            paymentUrl = vnpayService.createOrder(totalAmount, orderCode, itemIds, user.getId(), req.getAddressId());
+            paymentUrl = vnpayService.createOrder(totalAmount, orderCode, itemIds, user.getId(), req.getAddressId(), req.getNote(), shippingFee);
         } else {
             throw new BusinessException("payment_method_invalid");
         }
@@ -124,7 +132,7 @@ public class PaymentServiceImpl extends BaseService implements PaymentService {
         ConfirmCheckOutRes res = ConfirmCheckOutRes.builder()
                 .orderCode(orderCode)
                 .totalAmount(totalAmount)
-                .paymentMethod(method)
+                .paymentGateway(gateway)
                 .paymentUrl(paymentUrl)
                 .build();
 
@@ -133,7 +141,7 @@ public class PaymentServiceImpl extends BaseService implements PaymentService {
 
 
     @Override
-    public void handleVnPaySuccess(String orderCode, int addressId, BigDecimal totalAmount, List<Integer> cartItemIds, int userId, String referenceCode, long payDate) {
+    public void handleVnPaySuccess(String orderCode, int addressId, BigDecimal totalAmount, List<Integer> cartItemIds, int userId, String referenceCode, long payDate, String note, BigDecimal shippingCost) {
         List<CartRes.CartItemRes> items = getCartItems(cartItemIds, userId);
 
         OrderReq orderReq = OrderReq.builder()
@@ -142,6 +150,8 @@ public class PaymentServiceImpl extends BaseService implements PaymentService {
                 .code(orderCode)
                 .totalPrice(totalAmount)
                 .paymentMethod(PaymentMethod.BANK_TRANSFER)
+                .shippingCost(shippingCost)
+                .note(note)
                 .status(0)
                 .build();
 
@@ -200,7 +210,10 @@ public class PaymentServiceImpl extends BaseService implements PaymentService {
         Order order = new Order();
         order.setUserId(orderReq.getUserId());
         order.setCode(orderReq.getCode());
-        order.setStatus(OrderStatus.WAITING_FOR_CONFIMATION);
+        order.setStatus(OrderStatus.PENDING);
+        order.setPaymentMethod(orderReq.getPaymentMethod());
+        order.setShippingCost(orderReq.getShippingCost());
+        order.setNote(order.getNote());
         order.setTotalPrice(orderReq.getTotalPrice());
         order.setAddressId(orderReq.getAddressId());
         orderRepository.save(order);
@@ -213,6 +226,8 @@ public class PaymentServiceImpl extends BaseService implements PaymentService {
             detail.setOriginalPrice(item.getOriginalPrice());
             detail.setFinalPrice(item.getFinalPrice());
             orderDetailRepository.save(detail);
+
+            allocateStockBatches(detail);
         }
 
         Transactions transaction = new Transactions();
@@ -228,4 +243,34 @@ public class PaymentServiceImpl extends BaseService implements PaymentService {
         transaction.setPayDate(transactionReq.getPayDate());
         transactionRepository.save(transaction);
     }
+
+    private void allocateStockBatches(OrderDetail detail) {
+        int amountToAllocate = detail.getAmount();
+
+        List<StockBatch> availableBatches = stockBatchRepository
+                .findAvailableBatchesByModelId(detail.getModelId());
+
+        for (StockBatch batch : availableBatches) {
+            if (amountToAllocate == 0) break;
+
+            int quantityTaken = Math.min(batch.getQuantityRemaining(), amountToAllocate);
+
+            OrderDetailBatch odb = new OrderDetailBatch();
+            odb.setOrderDetailId(detail.getId());
+            odb.setStockBatchId(batch.getId());
+            odb.setQuantityAllocated(quantityTaken);
+            odb.setDeleted(false);
+            orderDetailBatchRepository.save(odb);
+
+            batch.setQuantityRemaining(batch.getQuantityRemaining() - quantityTaken);
+            stockBatchRepository.save(batch);
+
+            amountToAllocate -= quantityTaken;
+        }
+
+        if (amountToAllocate > 0) {
+            throw new BusinessException("Số lượng tồn kho không đủ cho model: " + detail.getModelId());
+        }
+    }
+
 }

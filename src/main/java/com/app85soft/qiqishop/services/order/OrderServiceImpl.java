@@ -5,6 +5,7 @@ import com.app85soft.qiqishop.dto.constant.OrderStatus;
 import com.app85soft.qiqishop.dto.constant.PaymentMethod;
 import com.app85soft.qiqishop.dto.request.ghn.GhnCreateOrderReq;
 import com.app85soft.qiqishop.dto.request.ghn.GhnItemReq;
+import com.app85soft.qiqishop.dto.request.order.OrderChangeStatusReq;
 import com.app85soft.qiqishop.dto.response.BaseResponse;
 import com.app85soft.qiqishop.dto.response.ghn.GhnCreateOrderRes;
 import com.app85soft.qiqishop.dto.response.order.OrderListRes;
@@ -26,6 +27,7 @@ import com.app85soft.qiqishop.repositories.order.OrderRepository;
 import com.app85soft.qiqishop.repositories.product.ProductRepository;
 import com.app85soft.qiqishop.services.BaseService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl extends BaseService implements OrderService {
@@ -47,17 +50,17 @@ public class OrderServiceImpl extends BaseService implements OrderService {
     private final ModelRepository modelRepository;
 
     @Override
-    public GhnCreateOrderRes createOrderGhn(int orderId) {
+    public GhnCreateOrderRes createOrderGhn(OrderChangeStatusReq req) {
         User user = getUser(PermissionKey.CREATE, PermissionType.PRODUCT);
 
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository.findById(req.getOrderId())
                 .orElseThrow(() -> new BusinessException("order_not_found"));
-        if (!order.getStatus().equals(OrderStatus.WAITING_FOR_CONFIMATION)) {
+        if (!order.getStatus().equals(OrderStatus.PENDING)) {
             throw new BusinessException("order_status_invalid");
         }
         Address address = addressRepository.findById(order.getAddressId())
                 .orElseThrow(() -> new BusinessException("address_not_found"));
-        List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(orderId);
+        List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(req.getOrderId());
 
         Map<Integer, Model> modelMap = orderDetails.stream()
                 .map(item -> modelRepository.findById(item.getModelId())
@@ -104,7 +107,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
                 .items(ghnItems)
                 .build();
         GhnCreateOrderRes ghnCreateOrderRes = ghnClient.createShippingOrder(orderRequest);
-        order.setStatus(OrderStatus.PICKING);
+        order.setStatus(OrderStatus.READY_TO_PICK);
         orderRepository.save(order);
 
         return ghnCreateOrderRes;
@@ -119,14 +122,28 @@ public class OrderServiceImpl extends BaseService implements OrderService {
     }
 
     @Override
-    public BaseResponse<OrderRes> getOrder(String code) {
+    public BaseResponse<OrderRes> getOrder(int orderId) {
         User user = getUser();
 
-        OrderRes orderRes = orderRepository.getOrder(code);
+        OrderRes orderRes = orderRepository.getOrder(orderId);
         if (orderRes == null) {
             throw new BusinessException(Translator.toLocale("id_not_exist"), HttpStatus.NOT_FOUND);
         }
         return new BaseResponse<>(orderRes);
+    }
+
+    @Override
+    public BaseResponse<Order> CancelOrder(OrderChangeStatusReq req) {
+        User user = getUser(PermissionKey.CREATE, PermissionType.PRODUCT);
+
+        Order order = orderRepository.findById(req.getOrderId())
+                .orElseThrow(() -> new BusinessException("order_not_found"));
+        if (!order.getStatus().equals(OrderStatus.PENDING)) {
+            throw new BusinessException("order_status_invalid");
+        }
+        order.setStatus(OrderStatus.CANCEL);
+        orderRepository.save(order);
+        return new BaseResponse<>(order);
     }
 
     @Override

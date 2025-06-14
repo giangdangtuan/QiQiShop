@@ -9,6 +9,7 @@ import com.app85soft.qiqishop.dto.response.payment.ConfirmCheckOutRes;
 import com.app85soft.qiqishop.services.payment.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/")
 @RequiredArgsConstructor
@@ -54,6 +56,9 @@ public class PaymentController {
                         .collect(Collectors.toMap(pair -> pair[0], pair -> pair[1]));
 
                 String orderCode = infoMap.get("orderCode");
+                String note = infoMap.get("note");
+                BigDecimal shippingCost = new BigDecimal(infoMap.get("shippingCost").replace(",", "."));
+                log.info("VNPay amount: " + shippingCost);
                 List<Integer> cartItemIds = Arrays.stream(infoMap.get("cart").split(","))
                         .map(Integer::parseInt)
                         .toList();
@@ -67,7 +72,7 @@ public class PaymentController {
 
                 BigDecimal totalAmount = new BigDecimal(params.get("vnp_Amount"))
                         .divide(BigDecimal.valueOf(100));
-                paymentService.handleVnPaySuccess(orderCode, addressId, totalAmount, cartItemIds, userId, referenceCode, payDate);
+                paymentService.handleVnPaySuccess(orderCode, addressId, totalAmount, cartItemIds, userId, referenceCode, payDate, note, shippingCost);
                 return "Thanh toán thành công, đơn hàng đã được tạo!";
             } catch (Exception e) {
                 e.printStackTrace();

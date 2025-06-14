@@ -1,6 +1,7 @@
 package com.app85soft.qiqishop.dto.request.user;
 
 import com.app85soft.qiqishop.entities.user.constant.Gender;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -15,6 +16,8 @@ import java.sql.Date;
 public class EditMyProfileReq {
     @NotBlank
     String name;
+    @Email
+    String email;
     Date birthday;
     Gender gender;
     Integer avatarId;

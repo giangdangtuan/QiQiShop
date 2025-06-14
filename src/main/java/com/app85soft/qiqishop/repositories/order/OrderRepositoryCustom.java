@@ -12,5 +12,5 @@ public interface OrderRepositoryCustom {
 
     List<OrderListRes> getOrders(OrderStatus status, String orderCode, PaymentMethod paymentMethod, Integer userId, int page);
 
-    OrderRes getOrder(String code);
+    OrderRes getOrder(int orderId);
 }

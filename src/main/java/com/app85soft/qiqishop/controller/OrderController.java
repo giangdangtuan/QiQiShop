@@ -2,13 +2,15 @@ package com.app85soft.qiqishop.controller;
 
 import com.app85soft.qiqishop.dto.constant.OrderStatus;
 import com.app85soft.qiqishop.dto.constant.PaymentMethod;
+import com.app85soft.qiqishop.dto.request.order.OrderChangeStatusReq;
 import com.app85soft.qiqishop.dto.response.BaseResponse;
 import com.app85soft.qiqishop.dto.response.ghn.GhnCreateOrderRes;
 import com.app85soft.qiqishop.dto.response.order.OrderListRes;
 import com.app85soft.qiqishop.dto.response.order.OrderRes;
-import com.app85soft.qiqishop.dto.response.product.ProductRes;
+import com.app85soft.qiqishop.entities.order.Order;
 import com.app85soft.qiqishop.services.order.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,9 +23,9 @@ import java.util.List;
 public class OrderController {
     private final OrderService orderService;
 
-    @PostMapping("/v1/order/to-picking/{orderId}")
-    public ResponseEntity<BaseResponse<GhnCreateOrderRes>> createGhnOrder(@PathVariable int orderId) {
-        return ResponseEntity.ok(new BaseResponse<>(orderService.createOrderGhn(orderId)));
+    @PostMapping("/v1/order/to-picking")
+    public ResponseEntity<BaseResponse<GhnCreateOrderRes>> createGhnOrder(@RequestBody @Valid OrderChangeStatusReq req) {
+        return ResponseEntity.ok(new BaseResponse<>(orderService.createOrderGhn(req)));
     }
 
     @Operation(summary = "Get list order.")
@@ -36,9 +38,15 @@ public class OrderController {
     }
 
     @Operation(summary = "Get order detail")
-    @GetMapping("v1/order/detail/{code}")
-    public ResponseEntity<BaseResponse<OrderRes>> getOrderDetail(@PathVariable("code") String code) {
-        return ResponseEntity.ok(orderService.getOrder(code));
+    @GetMapping("v1/order/detail/{id}")
+    public ResponseEntity<BaseResponse<OrderRes>> getOrderDetail(@PathVariable("id") int orderId) {
+        return ResponseEntity.ok(orderService.getOrder(orderId));
+    }
+
+    @Operation(summary = "Cancel order")
+    @PostMapping("/v1/order/cancel")
+    public ResponseEntity<BaseResponse<Order>> cancelOrder(@RequestBody @Valid OrderChangeStatusReq req) {
+        return ResponseEntity.ok(orderService.CancelOrder(req));
     }
 
     //    -----------USER-----------

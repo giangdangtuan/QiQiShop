@@ -291,15 +291,21 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     @Override
     public UserDetailRes editMyProfile(EditMyProfileReq request) {
-        User user = getUser(PermissionKey.CREATE, PermissionType.ACCOUNT);
+        User user = getUser();
         if (request.getName() != null && !request.getName().isEmpty()) {
             user.setName(request.getName());
+        }
+        if (request.getEmail() != null && !request.getEmail().isEmpty()) {
+            user.setEmail(request.getEmail());
         }
         if (request.getBirthday() != null) {
             user.setBirthday(request.getBirthday());
         }
         if (request.getGender() != null) {
             user.setGender(request.getGender());
+        }
+        if (request.getAvatarId() != null) {
+            user.setAvatarId(request.getAvatarId());
         }
         userRepository.save(user);
         return getUserRes(user);

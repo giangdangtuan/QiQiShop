@@ -8,13 +8,14 @@ import com.app85soft.qiqishop.dto.response.BaseResponse;
 import com.app85soft.qiqishop.dto.response.product.ProductDetailRes;
 import com.app85soft.qiqishop.dto.response.product.ProductRes;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface ProductService {
     ProductRes addProduct(AddProductReq productReq);
     ProductRes updateProduct(UpdateProductReq product);
     List<Integer> deleteProducts(IdsRequest req);
-    BaseResponse<List<ProductRes>> getProducts(ActiveStatus status, String name, Integer categoryId, int page);
+    BaseResponse<List<ProductRes>> getProducts(ActiveStatus status, String name, Integer categoryId, BigDecimal startPrice, BigDecimal endPrice, String sortBy, int page);
     BaseResponse<ProductDetailRes> getProduct(int productId);
 
 }

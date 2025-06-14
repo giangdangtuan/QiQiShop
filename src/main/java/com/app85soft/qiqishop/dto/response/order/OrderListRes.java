@@ -22,7 +22,21 @@ public class OrderListRes {
     String userName;
     BigDecimal totalPrice;
     PaymentMethod paymentMethod;
+    BigDecimal shippingCost;
+    String note;
     OrderStatus status;
 
     List<OrderDertailRes> orderDetails;
+
+    public OrderListRes(int id, String code, int userId, String userName, BigDecimal totalPrice, PaymentMethod paymentMethod, BigDecimal shippingCost, String note, OrderStatus status) {
+        this.id = id;
+        this.code = code;
+        this.userId = userId;
+        this.userName = userName;
+        this.totalPrice = totalPrice;
+        this.paymentMethod = paymentMethod;
+        this.shippingCost = shippingCost;
+        this.note = note;
+        this.status = status;
+    }
 }

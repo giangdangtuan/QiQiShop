@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class VnpayService {
     private final VnpayConfig config;
 
-    public String createOrder(BigDecimal total, String orderCode, List<Integer> cartItemIds, int userId, int addressId) {
+    public String createOrder(BigDecimal total, String orderCode, List<Integer> cartItemIds, int userId, int addressId, String note, BigDecimal shippingCost) {
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
         String vnp_IpAddr = "127.0.0.1";
@@ -25,7 +25,7 @@ public class VnpayService {
         String orderType = "order-type";
 
         String cartItemIdsStr = cartItemIds.stream().map(String::valueOf).collect(Collectors.joining(","));
-        String orderInfo = String.format("orderCode=%s|cart=%s|userId=%d|addressId=%d", orderCode, cartItemIdsStr, userId, addressId);
+        String orderInfo = String.format("orderCode=%s|cart=%s|userId=%d|addressId=%d|note=%s|shippingCost=%f", orderCode, cartItemIdsStr, userId, addressId, note, shippingCost);
 
         Map<String, String> vnp_Params = new HashMap<>();
         vnp_Params.put("vnp_Version", vnp_Version);

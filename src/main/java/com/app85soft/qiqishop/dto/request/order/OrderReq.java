@@ -18,5 +18,7 @@ public class OrderReq {
     String code;
     BigDecimal totalPrice;
     PaymentMethod paymentMethod;
+    BigDecimal shippingCost;
+    String note;
     int status;
 }

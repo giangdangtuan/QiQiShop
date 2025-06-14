@@ -11,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class GhnCreateOrderRes {
-    private String order_code;
-    private int status_code;
+    private String orderCode;
+    private int statusCode;
     private String message;
 }
