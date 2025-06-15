@@ -20,6 +20,8 @@ public interface OrderService {
 
     BaseResponse<Order> CancelOrder(OrderChangeStatusReq req);
 
+    BaseResponse<Order> CompleteOrder(OrderChangeStatusReq req);
+
 
     //    -----------USER-----------
     BaseResponse<List<OrderListRes>> getMyOrders(OrderStatus status, String orderCode, PaymentMethod paymentMethod, int page);

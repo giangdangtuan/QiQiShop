@@ -20,9 +20,10 @@ public class RatingRes {
     Integer modelId;
     String modelName;
     Integer ratingImage;
-
     String content;
     Integer ratingStar;
+    String originUrl;
+    String thumbUrl;
 
     Date createdAt;
 }

@@ -481,6 +481,23 @@ CREATE TABLE `ratings`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci;
 
+CREATE TABLE `blogs` (
+    `id`              int UNSIGNED    NOT NULL AUTO_INCREMENT,
+    `title`           VARCHAR(255)    NOT NULL,
+    `author_id`       int unsigned    NOT NULL COMMENT 'Khóa ngoại tham chiếu đến người dùng',
+    `thumbnail_id`    int unsigned              DEFAULT NULL,
+    `content`         LONGTEXT        NOT NULL,
+    `description`     TEXT            NOT NULL,
+    `status`          int             NOT NULL,
+    `deleted`         bit(1)          NOT NULL  DEFAULT b'0',
+    `created_at`      datetime        NOT NULL,
+    `updated_at`      datetime        NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`author_id`) REFERENCES `users` (`id`),
+    FOREIGN KEY (`thumbnail_id`) REFERENCES `upload_files` (`id`)
+) ENGINE = InnoDB COMMENT 'Tin tức'
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE `otp`
 (

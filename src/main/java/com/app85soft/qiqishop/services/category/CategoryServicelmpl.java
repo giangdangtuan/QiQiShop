@@ -57,7 +57,7 @@ public class CategoryServicelmpl extends BaseService implements CategoryService 
 
      @Override
      public List<Integer> deleteCategory(IdsRequest request) {
-         User user = getUser(PermissionKey.DECISION, PermissionType.ACCOUNT);
+         User user = getUser(PermissionKey.DECISION, PermissionType.PRODUCT);
          List<Integer> categoryIds = request.getIds();
          List<Integer> existingIds = categoryRepository.getAllIdToCheckExist(categoryIds);
          List<Integer> nonExistingIds = categoryIds.stream().filter(id -> !existingIds.contains(id)).toList();

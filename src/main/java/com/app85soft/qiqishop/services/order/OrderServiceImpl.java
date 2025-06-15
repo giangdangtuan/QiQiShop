@@ -147,6 +147,20 @@ public class OrderServiceImpl extends BaseService implements OrderService {
     }
 
     @Override
+    public BaseResponse<Order> CompleteOrder(OrderChangeStatusReq req) {
+        User user = getUser(PermissionKey.CREATE, PermissionType.PRODUCT);
+
+        Order order = orderRepository.findById(req.getOrderId())
+                .orElseThrow(() -> new BusinessException("order_not_found"));
+        if (!order.getStatus().equals(OrderStatus.READY_TO_PICK)) {
+            throw new BusinessException("order_status_invalid");
+        }
+        order.setStatus(OrderStatus.DELIVERED);
+        orderRepository.save(order);
+        return new BaseResponse<>(order);
+    }
+
+    @Override
     public BaseResponse<List<OrderListRes>> getMyOrders(OrderStatus status, String orderCode, PaymentMethod paymentMethod, int page) {
         User user = getUser();
         long countOrder = orderRepository.countOrder(status, orderCode, paymentMethod);

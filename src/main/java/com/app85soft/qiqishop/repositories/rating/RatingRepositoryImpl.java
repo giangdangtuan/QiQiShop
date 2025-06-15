@@ -4,6 +4,7 @@ import com.app85soft.qiqishop.dto.response.rating.RatingRes;
 import com.app85soft.qiqishop.entities.model.QModel;
 import com.app85soft.qiqishop.entities.product.QProduct;
 import com.app85soft.qiqishop.entities.rating.QRating;
+import com.app85soft.qiqishop.entities.upload_file.QUploadFile;
 import com.app85soft.qiqishop.entities.user.QUser;
 import com.app85soft.qiqishop.repositories.BaseRepository;
 import com.querydsl.core.BooleanBuilder;
@@ -22,6 +23,7 @@ public class RatingRepositoryImpl extends BaseRepository implements RatingReposi
     private final QProduct qProduct = QProduct.product;
     private final QModel qModel = QModel.model;
     private final QUser qUser = QUser.user;
+    private final QUploadFile qUploadFile = QUploadFile.uploadFile;
 
     @Override
     public long countRating(int productId) {
@@ -49,6 +51,7 @@ public class RatingRepositoryImpl extends BaseRepository implements RatingReposi
                 .leftJoin(qProduct).on(qModel.productId.eq(qProduct.id)
                         .and(qProduct.deleted.eq(false)))
                 .leftJoin(qUser).on(qRating.userId.eq(qUser.id))
+                .leftJoin(qUploadFile).on(qRating.ratingImage.eq(qUploadFile.id))
                 .where(builder)
                 .orderBy(qRating.id.desc())
                 .offset((long) page * PAGE_SIZE)
@@ -56,14 +59,16 @@ public class RatingRepositoryImpl extends BaseRepository implements RatingReposi
                 .select(Projections.fields(RatingRes.class,
                         qRating.id,
                         qRating.userId,
+                        qUser.name.as("userName"),
                         qRating.orderId,
                         qRating.modelId,
+                        qModel.name.as("modelName"),
                         qRating.ratingImage,
                         qRating.content,
                         qRating.ratingStar,
-                        qRating.createdAt,
-                        qModel.name.as("modelName"),
-                        qUser.name.as("userName")
+                        qUploadFile.originUrl.as("originUrl"),
+                        qUploadFile.thumbUrl.as("thumbUrl"),
+                        qRating.createdAt
                 ))
                 .fetch();
         return ratings;

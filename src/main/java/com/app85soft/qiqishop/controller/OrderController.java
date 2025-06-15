@@ -49,6 +49,12 @@ public class OrderController {
         return ResponseEntity.ok(orderService.CancelOrder(req));
     }
 
+    @Operation(summary = "Completed order")
+    @PostMapping("/v1/order/complete")
+    public ResponseEntity<BaseResponse<Order>> completeOrder(@RequestBody @Valid OrderChangeStatusReq req) {
+        return ResponseEntity.ok(orderService.CompleteOrder(req));
+    }
+
     //    -----------USER-----------
     @Operation(summary = "Get list order for user.")
     @GetMapping("v1/my-order/list")
