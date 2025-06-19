@@ -15,7 +15,7 @@ public interface ProductService {
     ProductRes addProduct(AddProductReq productReq);
     ProductRes updateProduct(UpdateProductReq product);
     List<Integer> deleteProducts(IdsRequest req);
-    BaseResponse<List<ProductRes>> getProducts(ActiveStatus status, String name, Integer categoryId, BigDecimal startPrice, BigDecimal endPrice, String sortBy, int page);
+    BaseResponse<List<ProductRes>> getProducts(ActiveStatus status, String name, List<Integer> categoryId, BigDecimal startPrice, BigDecimal endPrice, int page);
     BaseResponse<ProductDetailRes> getProduct(int productId);
 
 }

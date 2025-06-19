@@ -18,7 +18,7 @@ import lombok.experimental.FieldDefaults;
 public class Rating extends BaseEntity {
     Integer userId;
     Integer orderId;
-    Integer modelId;
+    Integer productId;
     Integer ratingImage;
 
     String content;

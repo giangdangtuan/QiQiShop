@@ -41,6 +41,7 @@ public class PurchaseOrderServiceImpl extends BaseService implements PurchaseOrd
         purchaseOrder.setUserId(user.getId());
         purchaseOrder.setNote(req.getNote());
         purchaseOrder.setCode(code);
+        purchaseOrder.setImportDate(req.getImportDate());
         purchaseOrderRepository.save(purchaseOrder);
 
         for(AddPurchaseOrderReq.PurchaseOrderItem item : req.getPurchaseOrderItems()) {
@@ -92,6 +93,7 @@ public class PurchaseOrderServiceImpl extends BaseService implements PurchaseOrd
                 .id(purchaseOrder.getId())
                 .note(purchaseOrder.getNote())
                 .code(purchaseOrder.getCode())
+                .importDate(purchaseOrder.getImportDate())
                 .userId(purchaseOrder.getUserId())
                 .items(purchaseOrderItemRepository.getPurchaseOrderItems(purchaseOrder.getId()))
                 .build();

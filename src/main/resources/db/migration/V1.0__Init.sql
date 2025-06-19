@@ -342,6 +342,7 @@ CREATE TABLE `orders`
     `payment_method`      int                      DEFAULT '0',
     `shipping_cost`       DECIMAL(10, 2)  NOT NULL COMMENT 'Tiền ship',
     `status`              int             NOT NULL COMMENT 'Trạng thái',
+    `rated`               bit             NOT NULL DEFAULT 0 COMMENT 'Đánh dấu trạng thái đánh giá của bản ghi: `0`: Chưa đánh giá, `1`: Đã đánh giá',
     `deleted`             bit             NOT NULL DEFAULT 0 COMMENT 'Đánh dấu trạng thái xóa của bản ghi: `0`: Chưa xóa, `1`: Đã xóa',
     `created_at`          datetime        NOT NULL,
     `updated_at`          datetime        NOT NULL,
@@ -402,6 +403,7 @@ CREATE TABLE `purchase_orders` (
     `code`          VARCHAR(50)     NOT NULL UNIQUE COMMENT 'Mã phiếu nhập',
     `user_id`       int unsigned    NOT NULL COMMENT 'Khóa ngoại tham chiếu đến người dùng',
     `note`          TEXT                     DEFAULT NULL,
+    `import_date`   BIGINT          NOT NULL COMMENT 'Ngày bắt đầu khuyển mãi',
     `deleted`       bit(1)          NOT NULL DEFAULT b'0',
     `created_at`    datetime        NOT NULL,
     `updated_at`    datetime        NOT NULL,
@@ -465,7 +467,7 @@ CREATE TABLE `ratings`
     `id`              int unsigned          NOT NULL AUTO_INCREMENT,
     `user_id`         int unsigned          NOT NULL COMMENT 'Khóa ngoại tham chiếu người dùng',
     `order_id`        int unsigned          NOT NULL COMMENT 'Khóa ngoại tham chiếu hóa đơn',
-    `model_id`        int unsigned          NOT NULL COMMENT 'Khóa ngoại tham chiếu sản phẩm biến thể',
+    `product_id`        int unsigned          NOT NULL COMMENT 'Khóa ngoại tham chiếu sản phẩm biến thể',
     `rating_image`    int unsigned                   DEFAULT NULL COMMENT 'Khóa ngoại tham chiếu đến ảnh đánh giá',
     `content`         varchar(255)          NOT NULL,
     `rating_star`     int unsigned          NOT NULL,
@@ -475,7 +477,7 @@ CREATE TABLE `ratings`
     PRIMARY KEY (`id`),
     FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
     FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`),
-    FOREIGN KEY (`model_id`) REFERENCES `model` (`id`),
+    FOREIGN KEY (`product_id`) REFERENCES `product` (`id`),
     FOREIGN KEY (`rating_image`) REFERENCES `upload_files` (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4

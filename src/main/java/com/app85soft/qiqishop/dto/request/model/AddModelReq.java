@@ -21,7 +21,6 @@ public class AddModelReq {
     Integer productId;
     @NotNull
     BigDecimal price;
-    int stock;
 
     Integer optionValue1Id;
     Integer optionValue2Id;

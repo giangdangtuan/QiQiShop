@@ -2,6 +2,7 @@ package com.app85soft.qiqishop.repositories.order;
 
 import com.app85soft.qiqishop.dto.constant.OrderStatus;
 import com.app85soft.qiqishop.dto.constant.PaymentMethod;
+import com.app85soft.qiqishop.dto.request.rating.AddRatingReq;
 import com.app85soft.qiqishop.dto.response.address.AddressRes;
 import com.app85soft.qiqishop.dto.response.order.OrderDertailRes;
 import com.app85soft.qiqishop.dto.response.order.OrderListRes;
@@ -90,7 +91,8 @@ public class OrderRepositoryImpl extends BaseRepository implements OrderReposito
                         qOrder.paymentMethod,
                         qOrder.shippingCost,
                         qOrder.note,
-                        qOrder.status
+                        qOrder.status,
+                        qOrder.rated
                 ))
                 .from(qOrder)
                 .leftJoin(qUser).on(qOrder.userId.eq(qUser.id))
@@ -100,19 +102,10 @@ public class OrderRepositoryImpl extends BaseRepository implements OrderReposito
                 .fetch();
 
         for (OrderListRes order : orders) {
-            final List<Integer> ratedModelIds = (userId != null)
-                    ? query()
-                    .select(qRating.modelId)
-                    .from(qRating)
-                    .where(qRating.orderId.eq(order.getId())
-                            .and(qRating.userId.eq(userId))
-                            .and(qRating.deleted.eq(false)))
-                    .fetch()
-                    : List.of();
-
             List<OrderDertailRes> orderDetails = query()
                     .select(Projections.constructor(OrderDertailRes.class,
                             qOrderDetail.id,
+                            qProduct.id,
                             qModel.id,
                             qModel.name,
                             qProduct.name,
@@ -131,7 +124,6 @@ public class OrderRepositoryImpl extends BaseRepository implements OrderReposito
                             .and(qOrderDetail.deleted.eq(false)))
                     .fetch();
 
-            orderDetails.forEach(detail -> detail.setRated(ratedModelIds.contains(detail.getModelId())));
             order.setOrderDetails(orderDetails);
         }
         return orders;
@@ -150,6 +142,7 @@ public class OrderRepositoryImpl extends BaseRepository implements OrderReposito
                         qOrder.shippingCost,
                         qOrder.note,
                         qOrder.status,
+                        qOrder.rated,
                         Projections.constructor(AddressRes.class,
                                 qAddress.id,
                                 qAddress.userId,
@@ -193,5 +186,31 @@ public class OrderRepositoryImpl extends BaseRepository implements OrderReposito
         order.setOrderDetails(orderDetails);
 
         return order;
+    }
+
+    @Override
+    public boolean existsByOrderIdAndProductId(int orderId, List<AddRatingReq.RatingItem> ratingItems) {
+        List<Integer> productIds = ratingItems.stream()
+                .map(AddRatingReq.RatingItem::getProductId)
+                .distinct()
+                .toList();
+
+        BooleanBuilder builder = new BooleanBuilder();
+        builder.and(qOrder.id.eq(orderId));
+        builder.and(qOrderDetail.orderId.eq(qOrder.id));
+        builder.and(qModel.id.eq(qOrderDetail.modelId));
+        builder.and(qProduct.id.eq(qModel.productId));
+        builder.and(qProduct.id.in(productIds));
+
+        // Kiểm tra có ít nhất 1 sản phẩm hợp lệ trong đơn hàng
+        Long count = query().from(qOrder)
+                .join(qOrderDetail).on(qOrderDetail.orderId.eq(qOrder.id))
+                .join(qModel).on(qModel.id.eq(qOrderDetail.modelId))
+                .join(qProduct).on(qProduct.id.eq(qModel.productId))
+                .where(builder)
+                .select(qProduct.id.countDistinct()) // có thể dùng count() hoặc fetchFirst()
+                .fetchOne();
+
+        return count != null && count == productIds.size(); // đảm bảo tất cả sản phẩm đều hợp lệ
     }
 }

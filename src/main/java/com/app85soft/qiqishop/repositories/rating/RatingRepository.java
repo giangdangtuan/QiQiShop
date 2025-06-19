@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RatingRepository extends JpaRepository<Rating, Integer>, RatingRepositoryCustom {
-    boolean existsByOrderIdAndModelId(Integer orderId, Integer modelId);
+    boolean existsByOrderId(Integer orderId);
 }

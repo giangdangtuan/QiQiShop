@@ -14,9 +14,9 @@ public interface ProductRepositoryCustom {
 
     boolean existsByName(String name, Integer id);
 
-    long countProduct(ActiveStatus status, String searchKeyword, Integer categoryId, BigDecimal startPrice, BigDecimal endPrice);
+    long countProduct(ActiveStatus status, String searchKeyword, List<Integer> categoryId, BigDecimal startPrice, BigDecimal endPrice);
 
-    List<ProductRes> getProduct(ActiveStatus status, String searchKeyword, Integer categoryId, BigDecimal startPrice, BigDecimal endPrice, String sortBy, int page);
+    List<ProductRes> getProduct(ActiveStatus status, String searchKeyword, List<Integer> categoryId, BigDecimal startPrice, BigDecimal endPrice, int page);
 
     List<ProductRes> getProductSale(ActiveStatus status, String searchKeyword, Integer categoryId, int page);
 

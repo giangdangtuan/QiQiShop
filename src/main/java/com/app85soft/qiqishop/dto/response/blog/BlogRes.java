@@ -4,6 +4,8 @@ import com.app85soft.qiqishop.dto.constant.BlogStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.Date;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -22,4 +24,5 @@ public class BlogRes {
     String thumbUrl;
 
     BlogStatus status;
+    Date createdAt;
 }

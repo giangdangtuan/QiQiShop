@@ -80,6 +80,7 @@ public class PurchaseOrderRepositoryImpl extends BaseRepository implements Purch
                         qPurchaseOrder.userId,
                         qUser.name.as("userName"),
                         qPurchaseOrder.note,
+                        qPurchaseOrder.importDate,
                         qPurchaseOrder.createdAt
                 ))
                 .fetch();
@@ -135,6 +136,7 @@ public class PurchaseOrderRepositoryImpl extends BaseRepository implements Purch
                         qPurchaseOrder.userId,
                         qUser.name.as("userName"),
                         qPurchaseOrder.note,
+                        qPurchaseOrder.importDate,
                         qPurchaseOrder.createdAt
                 ))
                 .fetchOne();
@@ -144,7 +146,7 @@ public class PurchaseOrderRepositoryImpl extends BaseRepository implements Purch
         }
 
         List<PurchaseOrderItemRes> purchaseOrderItems = query().from(qPurchaseOrderItem)
-                .leftJoin(qModel).on(qPurchaseOrderItem.purchaseOrderId.eq(qModel.id))
+                .leftJoin(qModel).on(qPurchaseOrderItem.modelId.eq(qModel.id))
                 .leftJoin(qProduct).on(qProduct.id.eq(qModel.productId))
                 .leftJoin(qUploadFile).on(qUploadFile.id.eq(qProduct.coverImage))
                 .where(qPurchaseOrderItem.purchaseOrderId.eq(purchaseOrderId)

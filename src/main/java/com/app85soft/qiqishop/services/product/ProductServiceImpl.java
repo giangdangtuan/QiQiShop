@@ -120,7 +120,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
                 model.setName(modelReq.getName());
                 model.setProductId(product.getId());
                 model.setPrice(modelReq.getPrice());
-                model.setStock(modelReq.getStock());
+                model.setStock(0);
                 model.setOptionValue1Id(optionValue1Id);
                 model.setOptionValue2Id(optionValue2Id);
                 models.add(model);
@@ -131,7 +131,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
             model.setCode(generateCode(8, 2));
             model.setProductId(product.getId());
             model.setPrice(req.getPrice());
-            model.setStock(req.getStock());
+            model.setStock(0);
             modelRepository.save(model);
         }
 
@@ -279,7 +279,6 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 
                 model.setName(modelReq.getName());
                 model.setPrice(modelReq.getPrice());
-                model.setStock(modelReq.getStock());
                 model.setDeleted(false);
 
                 // Tách tên: "Đỏ-S" => ["Đỏ", "S"]
@@ -324,7 +323,6 @@ public class ProductServiceImpl extends BaseService implements ProductService {
             model.setCode(model.getCode() == null ? generateCode(8, 2) : model.getCode());
             model.setProductId(product.getId());
             model.setPrice(productReq.getPrice());
-            model.setStock(productReq.getStock());
             model.setDeleted(false);
             modelRepository.save(model);
 
@@ -395,10 +393,10 @@ public class ProductServiceImpl extends BaseService implements ProductService {
     }
 
     @Override
-    public BaseResponse<List<ProductRes>> getProducts(ActiveStatus status, String name, Integer categoryId, BigDecimal startPrice, BigDecimal endPrice, String sortBy, int page) {
+    public BaseResponse<List<ProductRes>> getProducts(ActiveStatus status, String name, List<Integer> categoryId, BigDecimal startPrice, BigDecimal endPrice, int page) {
 //        User user = getUser(PermissionKey.READ, PermissionType.PRODUCT);
         long countProduct = productRepository.countProduct(status, name, categoryId, startPrice, endPrice);
-        List<ProductRes> listProducts = productRepository.getProduct(status, name, categoryId, startPrice, endPrice, sortBy, page);
+        List<ProductRes> listProducts = productRepository.getProduct(status, name, categoryId, startPrice, endPrice, page);
         return new BaseResponse<>(listProducts, countProduct, page);
     }
 

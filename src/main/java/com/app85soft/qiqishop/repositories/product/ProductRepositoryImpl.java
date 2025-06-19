@@ -73,7 +73,7 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
     }
 
     @Override
-    public long countProduct(ActiveStatus status, String searchKeyword, Integer categoryId, BigDecimal startPrice, BigDecimal endPrice) {
+    public long countProduct(ActiveStatus status, String searchKeyword, List<Integer> categoryId, BigDecimal startPrice, BigDecimal endPrice) {
         BooleanBuilder builder = new BooleanBuilder();
         if (status != null) {
             builder.and(qProduct.status.eq(status));
@@ -83,8 +83,8 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
             builder.andAnyOf(
                     qProduct.name.contains(searchKeyword));
         }
-        if(categoryId != null) {
-            builder.and(qProduct.categoryId.eq(categoryId));
+        if (categoryId != null && !categoryId.isEmpty()) {
+            builder.and(qProduct.categoryId.in(categoryId));
         }
         if (startPrice != null || endPrice != null) {
             JPQLQuery<Integer> subQuery = query().select(qModel.productId).from(qModel);
@@ -105,8 +105,9 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
     }
 
     @Override
-    public List<ProductRes> getProduct(ActiveStatus status, String searchKeyword, Integer categoryId,
-                                       BigDecimal startPrice, BigDecimal endPrice, String sortBy, int page) {
+    public List<ProductRes> getProduct(ActiveStatus status, String searchKeyword, List<Integer> categoryId,
+                                       BigDecimal startPrice, BigDecimal endPrice, int page) {
+        log.info("categoryId = " + categoryId);
         BooleanBuilder builder = new BooleanBuilder();
         if (status != null) {
             builder.and(qProduct.status.eq(status));
@@ -115,8 +116,8 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
         if (searchKeyword != null) {
             builder.and(qProduct.name.contains(searchKeyword));
         }
-        if (categoryId != null) {
-            builder.and(qProduct.categoryId.eq(categoryId));
+        if (categoryId != null && !categoryId.isEmpty()) {
+            builder.and(qProduct.categoryId.in(categoryId));
         }
         if (startPrice != null || endPrice != null) {
             BooleanBuilder priceBuilder = new BooleanBuilder();
@@ -136,7 +137,6 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
         }
 
         List<ProductRes> products = query().from(qProduct)
-                .join(qModel).on(qModel.productId.eq(qProduct.id))
                 .leftJoin(qUploadFile).on(qUploadFile.id.eq(qProduct.coverImage)
                         .and(qUploadFile.deleted.eq(false)))
                 .where(builder)

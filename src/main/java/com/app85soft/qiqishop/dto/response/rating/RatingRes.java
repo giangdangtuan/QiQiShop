@@ -17,8 +17,7 @@ public class RatingRes {
     Integer userId;
     String userName;
     Integer orderId;
-    Integer modelId;
-    String modelName;
+    Integer productId;
     Integer ratingImage;
     String content;
     Integer ratingStar;

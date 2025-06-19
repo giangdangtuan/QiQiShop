@@ -69,7 +69,8 @@ public class BlogRespositoryImpl extends BaseRepository implements BlogResposito
                         qBlog.description,
                         qUploadFile.originUrl.as("originUrl"),
                         qUploadFile.thumbUrl.as("thumbUrl"),
-                        qBlog.status
+                        qBlog.status,
+                        qBlog.createdAt
                 ))
                 .fetch();
     }
@@ -95,7 +96,8 @@ public class BlogRespositoryImpl extends BaseRepository implements BlogResposito
                         qBlog.description,
                         qUploadFile.originUrl.as("originUrl"),
                         qUploadFile.thumbUrl.as("thumbUrl"),
-                        qBlog.status
+                        qBlog.status,
+                        qBlog.createdAt
                 ))
                 .fetchOne();
 

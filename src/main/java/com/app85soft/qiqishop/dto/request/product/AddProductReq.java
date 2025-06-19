@@ -26,7 +26,6 @@ public class AddProductReq {
     @NotBlank
     String description;
     BigDecimal price;
-    int stock;
     ActiveStatus status;
 
     List<VariantOptionReq> variantOptions;

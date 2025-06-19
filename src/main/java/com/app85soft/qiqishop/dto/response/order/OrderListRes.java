@@ -25,10 +25,11 @@ public class OrderListRes {
     BigDecimal shippingCost;
     String note;
     OrderStatus status;
+    Boolean rated;
 
     List<OrderDertailRes> orderDetails;
 
-    public OrderListRes(int id, String code, int userId, String userName, BigDecimal totalPrice, PaymentMethod paymentMethod, BigDecimal shippingCost, String note, OrderStatus status) {
+    public OrderListRes(int id, String code, int userId, String userName, BigDecimal totalPrice, PaymentMethod paymentMethod, BigDecimal shippingCost, String note, OrderStatus status, Boolean rated) {
         this.id = id;
         this.code = code;
         this.userId = userId;
@@ -38,5 +39,6 @@ public class OrderListRes {
         this.shippingCost = shippingCost;
         this.note = note;
         this.status = status;
+        this.rated = rated;
     }
 }

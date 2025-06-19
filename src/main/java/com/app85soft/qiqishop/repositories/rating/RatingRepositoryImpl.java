@@ -28,12 +28,10 @@ public class RatingRepositoryImpl extends BaseRepository implements RatingReposi
     @Override
     public long countRating(int productId) {
         BooleanBuilder builder = new BooleanBuilder();
-        builder.and(qProduct.id.eq(productId));
+        builder.and(qRating.productId.eq(productId));
         builder.and(qRating.deleted.eq(false));
 
         Long count = query().from(qRating)
-                .leftJoin(qModel).on(qRating.modelId.eq(qModel.id))
-                .leftJoin(qProduct).on(qModel.productId.eq(qProduct.id))
                 .where(builder)
                 .select(qRating.id.count())
                 .fetchOne();
@@ -43,13 +41,10 @@ public class RatingRepositoryImpl extends BaseRepository implements RatingReposi
     @Override
     public List<RatingRes> getRatings(int productId, int page) {
         BooleanBuilder builder = new BooleanBuilder();
-        builder.and(qProduct.id.eq(productId));
+        builder.and(qRating.productId.eq(productId));
         builder.and(qRating.deleted.eq(false));
 
         List<RatingRes> ratings = query().from(qRating)
-                .leftJoin(qModel).on(qRating.modelId.eq(qModel.id))
-                .leftJoin(qProduct).on(qModel.productId.eq(qProduct.id)
-                        .and(qProduct.deleted.eq(false)))
                 .leftJoin(qUser).on(qRating.userId.eq(qUser.id))
                 .leftJoin(qUploadFile).on(qRating.ratingImage.eq(qUploadFile.id))
                 .where(builder)
@@ -61,8 +56,7 @@ public class RatingRepositoryImpl extends BaseRepository implements RatingReposi
                         qRating.userId,
                         qUser.name.as("userName"),
                         qRating.orderId,
-                        qRating.modelId,
-                        qModel.name.as("modelName"),
+                        qRating.productId,
                         qRating.ratingImage,
                         qRating.content,
                         qRating.ratingStar,
@@ -77,13 +71,10 @@ public class RatingRepositoryImpl extends BaseRepository implements RatingReposi
     @Override
     public Double getAverageRating(int productId) {
         BooleanBuilder builder = new BooleanBuilder();
-        builder.and(qProduct.id.eq(productId));
+        builder.and(qRating.productId.eq(productId));
         builder.and(qRating.deleted.eq(false));
-        builder.and(qProduct.deleted.eq(false));
 
         Double avg = query().from(qRating)
-                .leftJoin(qModel).on(qRating.modelId.eq(qModel.id))
-                .leftJoin(qProduct).on(qModel.productId.eq(qProduct.id))
                 .where(builder)
                 .select(qRating.ratingStar.avg())
                 .fetchOne();

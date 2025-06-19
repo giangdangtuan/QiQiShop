@@ -19,6 +19,7 @@ public class PurchaseOrderRes {
     Integer userId;
     String userName;
     String note;
+    Long importDate;
     Date createdAt;
 
     List<PurchaseOrderItemRes> items;

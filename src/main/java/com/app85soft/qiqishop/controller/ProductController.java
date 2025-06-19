@@ -34,14 +34,12 @@ public class ProductController {
                                                                       @Parameter(description = "[name]")
                                                                       @RequestParam(required = false) String searchKeyword,
                                                                       @Parameter(description = "[category]")
-                                                                      @RequestParam(required = false) Integer catgoryId,
-                                                                      @Parameter(description = "[category]")
+                                                                      @RequestParam(required = false) List<Integer> categoryId,
+                                                                      @Parameter(description = "[startPrice]")
                                                                       @RequestParam(required = false) BigDecimal startPrice,
-                                                                      @Parameter(description = "[category]")
-                                                                      @RequestParam(required = false) BigDecimal endPrice,
-                                                                      @Parameter(description = "[category]")
-                                                                      @RequestParam(required = false) String sortBy) {
-        return ResponseEntity.ok(productService.getProducts(status, searchKeyword, catgoryId, startPrice, endPrice, sortBy, page));
+                                                                      @Parameter(description = "[endPrice]")
+                                                                      @RequestParam(required = false) BigDecimal endPrice) {
+        return ResponseEntity.ok(productService.getProducts(status, searchKeyword, categoryId, startPrice, endPrice, page));
     }
 
 

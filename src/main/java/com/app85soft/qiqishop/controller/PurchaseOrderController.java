@@ -27,7 +27,7 @@ public class PurchaseOrderController {
     }
 
     @Operation(summary = "Get list PurchaseOrder.")
-    @GetMapping("v1/purchase_order/list")
+    @GetMapping("v1/purchase-order/list")
     public ResponseEntity<BaseResponse<List<PurchaseOrderRes>>> getPurchaseOrders(@RequestParam int page,
                                                                                   @Parameter(description = "[code]")
                                                                                   @RequestParam(required = false) String searchKeyword,
@@ -39,7 +39,7 @@ public class PurchaseOrderController {
     }
 
     @Operation(summary = "Get PurchaseOrder detail")
-    @GetMapping("v1/purchase_order/detail/{id}")
+    @GetMapping("v1/purchase-order/detail/{id}")
     public ResponseEntity<BaseResponse<PurchaseOrderRes>> getPurchaseOrderDetail(@PathVariable("id") int purchaseOrderId) {
         return ResponseEntity.ok(purchaseOrderService.getPurchaseOrder(purchaseOrderId));
     }

@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrderDertailRes {
     int id;
+    int productId;
     int modelId;
     String modelName;
     String productName;
@@ -24,8 +25,6 @@ public class OrderDertailRes {
     BigDecimal finalPrice;
     String originUrl;
     String thumbUrl;
-
-    boolean rated;
 
     public OrderDertailRes(int id, int modelId, String modelName, String productName, Integer productImage, int amount, BigDecimal originalPrice, BigDecimal finalPrice, String originUrl, String thumbUrl) {
         this.id = id;

@@ -28,6 +28,7 @@ public class Order extends BaseEntity {
     BigDecimal shippingCost;
     String note;
     OrderStatus status;
+    boolean rated;
 
     boolean deleted;
 }

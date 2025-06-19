@@ -7,7 +7,7 @@ import com.app85soft.qiqishop.dto.response.rating.RatingRes;
 import java.util.List;
 
 public interface RatingService {
-    RatingRes addRating(AddRatingReq req);
+    List<RatingRes> addRating(AddRatingReq req);
 
     BaseResponse<List<RatingRes>> getRatings(int productId, int page);
 
