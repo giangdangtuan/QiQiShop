@@ -518,6 +518,23 @@ CREATE TABLE `otp`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci;
 
+CREATE TABLE `chat_message`
+(
+    `id`            int unsigned NOT NULL AUTO_INCREMENT COMMENT 'Id phien xac thuc',
+    `sender_id`     int unsigned NOT NULL,
+    `recipient_id`  int unsigned NOT NULL,
+    `content`       TEXT         NOT NULL,
+    `seen`          bit          NOT NULL DEFAULT 0,
+    `deleted`       bit          NOT NULL DEFAULT 0,
+    `created_at`    timestamp    NOT NULL,
+    `updated_at`    timestamp    NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`),
+    FOREIGN KEY (`recipient_id`) REFERENCES `users` (`id`)
+) ENGINE = InnoDB COMMENT ='Quan ly gui Otp'
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
 CREATE TABLE qrtz_scheduler_job_info
 (
     id              int unsigned NOT NULL AUTO_INCREMENT,
