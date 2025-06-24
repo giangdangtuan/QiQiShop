@@ -8,7 +8,6 @@ import com.app85soft.qiqishop.entities.order.Order;
 import com.app85soft.qiqishop.entities.rating.Rating;
 import com.app85soft.qiqishop.entities.user.User;
 import com.app85soft.qiqishop.exceptions.BusinessException;
-import com.app85soft.qiqishop.repositories.order.OrderDetailRepository;
 import com.app85soft.qiqishop.repositories.order.OrderRepository;
 import com.app85soft.qiqishop.repositories.rating.RatingRepository;
 import com.app85soft.qiqishop.services.BaseService;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

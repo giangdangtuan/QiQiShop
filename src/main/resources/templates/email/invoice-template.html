@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            background: #f2f4f8;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .invoice-box {
+            background: #ffffff;
+            max-width: 750px;
+            margin: auto;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e0e6ed;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo img {
+            max-height: 80px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #ff7875;
+            margin-bottom: 25px;
+            font-size: 28px;
+        }
+
+        .info p {
+            margin: 6px 0;
+            font-size: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+            font-size: 15px;
+        }
+
+        thead {
+            background-color: #ff7875;
+            color: #fff;
+        }
+
+        th, td {
+            padding: 14px 12px;
+            text-align: center;
+            border-bottom: 1px solid #e0e6ed;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #fff4f4;
+        }
+
+        tbody tr:hover {
+            background-color: #ffecec;
+        }
+
+        .total {
+            font-weight: 600;
+            font-size: 18px;
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .footer {
+            margin-top: 35px;
+            font-size: 14px;
+            color: #777;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .invoice-box {
+                padding: 20px;
+            }
+
+            table th, table td {
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            .info p {
+                font-size: 14px;
+            }
+
+            h2 {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="invoice-box">
+    <!-- Logo thương hiệu -->
+<!--    <div class="logo">-->
+<!--        <img src="http://localhost:5173/images/logo_qiqishop_nobg.png" alt="QiqiShop Logo" style="max-height: 60px; display: block; margin: 0 auto;"/>-->
+<!--    </div>-->
+
+    <h2>🧾 HÓA ĐƠN MUA HÀNG - QIQISHOP</h2>
+
+    <div class="info">
+        <p><strong>Mã đơn hàng:</strong> <span th:text="${code}"></span></p>
+        <p><strong>Người đặt:</strong> <span th:text="${userName}"></span></p>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Sản phẩm</th>
+            <th>Phân loại</th>
+            <th>Số lượng</th>
+            <th>Đơn giá</th>
+            <th>Thành tiền</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${items}">
+            <td th:text="${item.productName}"></td>
+            <td th:text="${item.modelName}"></td>
+            <td th:text="${item.quantity}"></td>
+            <td th:text="${item.unitPrice}"></td>
+            <td th:text="${item.totalPrice}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <p class="total">Phí vận chuyển: <span th:text="${shippingCost}"></span></p>
+    <p class="total">Tổng cộng: <span th:text="${total}"></span></p>
+
+    <div class="footer">
+        Cảm ơn bạn đã mua sắm tại <strong>QiqiShop</strong>!<br>
+        Mọi thắc mắc xin gọi: <strong>1900.xxx.xxx</strong><br>
+        <em>Chúng tôi rất trân trọng sự tin tưởng của bạn. Hẹn gặp lại bạn lần sau!</em>
+    </div>
+</div>
+</body>
+</html>

@@ -5,6 +5,7 @@ import com.app85soft.qiqishop.dto.constant.OrderStatus;
 import com.app85soft.qiqishop.dto.constant.PaymentGateway;
 import com.app85soft.qiqishop.dto.constant.PaymentMethod;
 import com.app85soft.qiqishop.dto.constant.TransactionStatus;
+import com.app85soft.qiqishop.dto.request.EmailDetail;
 import com.app85soft.qiqishop.dto.request.order.OrderReq;
 import com.app85soft.qiqishop.dto.request.payment.CheckOutReq;
 import com.app85soft.qiqishop.dto.request.payment.ConfirmCheckOutReq;
@@ -22,6 +23,7 @@ import com.app85soft.qiqishop.entities.transaction.Transactions;
 import com.app85soft.qiqishop.entities.user.User;
 import com.app85soft.qiqishop.exceptions.BusinessException;
 import com.app85soft.qiqishop.external.GhnClient;
+import com.app85soft.qiqishop.other_service.send_email.SendEmailService;
 import com.app85soft.qiqishop.repositories.address.AddressRepository;
 import com.app85soft.qiqishop.repositories.cart_item.CartItemRepository;
 import com.app85soft.qiqishop.repositories.model.ModelRepository;
@@ -30,6 +32,7 @@ import com.app85soft.qiqishop.repositories.order.OrderDetailRepository;
 import com.app85soft.qiqishop.repositories.order.OrderRepository;
 import com.app85soft.qiqishop.repositories.stock_batch.StockBatchRepository;
 import com.app85soft.qiqishop.repositories.transaction.TransactionRepository;
+import com.app85soft.qiqishop.repositories.user.UserRepository;
 import com.app85soft.qiqishop.services.BaseService;
 import com.app85soft.qiqishop.services.vnpay.VnpayService;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +56,8 @@ public class PaymentServiceImpl extends BaseService implements PaymentService {
     private final ModelRepository modelRepository;
     private final StockBatchRepository stockBatchRepository;
     private final OrderDetailBatchRepository orderDetailBatchRepository;
+    private final SendEmailService sendEmailService;
+    private final UserRepository userRepository;
 
     @Override
     public BaseResponse<CheckOutRes> checkOut(CheckOutReq req) {
@@ -113,8 +118,16 @@ public class PaymentServiceImpl extends BaseService implements PaymentService {
                     .description("Thanh toán khi nhận hàng cho đơn " + orderCode)
                     .build();
 
-            saveOrderAndDetails(orderReq, transactionReq, items);
-            for(CartRes.CartItemRes item : items) {
+            int orderId = saveOrderAndDetails(orderReq, transactionReq, items);
+            String content = sendEmailService.buildInvoiceContent(orderId);
+
+            EmailDetail emailDetail = new EmailDetail();
+            emailDetail.setRecipient(user.getEmail());
+            emailDetail.setSubject("Đặt hàng thành công !");
+            emailDetail.setMsgBody(content);
+            sendEmailService.sendSimpleMail(emailDetail);
+
+            for (CartRes.CartItemRes item : items) {
                 modelRepository.decreaseStock(item.getModelId(), item.getQuantity());
             }
             List<Integer> cartItemIds = items.stream()
@@ -165,7 +178,14 @@ public class PaymentServiceImpl extends BaseService implements PaymentService {
                 .status(TransactionStatus.SUCCESS)
                 .build();
 
-        saveOrderAndDetails(orderReq, transactionReq, items);
+        int orderId = saveOrderAndDetails(orderReq, transactionReq, items);
+        String content = sendEmailService.buildInvoiceContent(orderId);
+
+        EmailDetail emailDetail = new EmailDetail();
+        emailDetail.setRecipient(userRepository.getProfileUser(userId).getEmail());
+        emailDetail.setSubject("Đặt hàng thành công !");
+        emailDetail.setMsgBody(content);
+        sendEmailService.sendSimpleMail(emailDetail);
         for(CartRes.CartItemRes item : items) {
             modelRepository.decreaseStock(item.getModelId(), item.getQuantity());
         }
@@ -206,7 +226,7 @@ public class PaymentServiceImpl extends BaseService implements PaymentService {
         )));
     }
 
-    private void saveOrderAndDetails (OrderReq orderReq, TransactionReq transactionReq, List<CartRes.CartItemRes> items) {
+    private int saveOrderAndDetails (OrderReq orderReq, TransactionReq transactionReq, List<CartRes.CartItemRes> items) {
         Order order = new Order();
         order.setUserId(orderReq.getUserId());
         order.setCode(orderReq.getCode());
@@ -242,6 +262,7 @@ public class PaymentServiceImpl extends BaseService implements PaymentService {
         transaction.setDescription("Thanh toán cho đơn hàng " + order.getCode());
         transaction.setPayDate(transactionReq.getPayDate());
         transactionRepository.save(transaction);
+        return order.getId();
     }
 
     private void allocateStockBatches(OrderDetail detail) {

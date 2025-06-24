@@ -4,5 +4,7 @@ import com.app85soft.qiqishop.dto.request.EmailDetail;
 
 public interface SendEmailService {
     void sendSimpleMail(EmailDetail details);
+
+    String buildInvoiceContent(int orderId);
 }
 

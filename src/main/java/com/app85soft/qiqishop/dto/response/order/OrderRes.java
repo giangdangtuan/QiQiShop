@@ -22,7 +22,6 @@ public class OrderRes {
     String code;
     int userId;
     String userName;
-    AddressRes address;
     BigDecimal totalPrice;
     PaymentMethod paymentMethod;
     BigDecimal shippingCost;
@@ -30,6 +29,22 @@ public class OrderRes {
 
     OrderStatus status;
     Boolean rated;
+
+    AddressRes address;
+
+    public OrderRes(int id, String code, int userId, String userName, BigDecimal totalPrice, PaymentMethod paymentMethod, BigDecimal shippingCost, String note, OrderStatus status, Boolean rated, AddressRes address) {
+        this.id = id;
+        this.code = code;
+        this.userId = userId;
+        this.userName = userName;
+        this.totalPrice = totalPrice;
+        this.paymentMethod = paymentMethod;
+        this.shippingCost = shippingCost;
+        this.note = note;
+        this.status = status;
+        this.rated = rated;
+        this.address = address;
+    }
 
     List<OrderDertailRes> orderDetails;
 }

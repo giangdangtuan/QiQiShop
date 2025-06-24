@@ -20,6 +20,7 @@ import com.app85soft.qiqishop.entities.role.constant.PermissionType;
 import com.app85soft.qiqishop.entities.user.User;
 import com.app85soft.qiqishop.exceptions.BusinessException;
 import com.app85soft.qiqishop.external.GhnClient;
+import com.app85soft.qiqishop.other_service.send_email.SendEmailService;
 import com.app85soft.qiqishop.repositories.address.*;
 import com.app85soft.qiqishop.repositories.model.ModelRepository;
 import com.app85soft.qiqishop.repositories.order.OrderDetailRepository;

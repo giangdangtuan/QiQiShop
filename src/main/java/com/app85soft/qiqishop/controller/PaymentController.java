@@ -8,10 +8,12 @@ import com.app85soft.qiqishop.dto.response.payment.CheckOutRes;
 import com.app85soft.qiqishop.dto.response.payment.ConfirmCheckOutRes;
 import com.app85soft.qiqishop.services.payment.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -43,7 +45,12 @@ public class PaymentController {
 
     @NoRequireAuth
     @GetMapping("/v1/vnpay-return")
-    public String vnpayReturn(@RequestParam Map<String, String> params) {
+    public RedirectView vnpayReturn(@RequestParam Map<String, String> params, HttpServletRequest request) {
+        String queryString = request.getQueryString();
+        String redirectUrl = "http://localhost:5173/checkout/status";
+        if (queryString != null) {
+            redirectUrl += "?" + queryString;
+        }
         String responseCode = params.get("vnp_ResponseCode");
 
         if ("00".equals(responseCode)) {
@@ -73,14 +80,11 @@ public class PaymentController {
                 BigDecimal totalAmount = new BigDecimal(params.get("vnp_Amount"))
                         .divide(BigDecimal.valueOf(100));
                 paymentService.handleVnPaySuccess(orderCode, addressId, totalAmount, cartItemIds, userId, referenceCode, payDate, note, shippingCost);
-                return "Thanh toán thành công, đơn hàng đã được tạo!";
             } catch (Exception e) {
                 e.printStackTrace();
-                return "Lỗi xử lý đơn hàng sau khi thanh toán!";
             }
         }
-
-        return "Thanh toán thất bại";
+        return new RedirectView(redirectUrl);
     }
 
     private long convertVnPayDateToTimestamp(String payDateStr) {

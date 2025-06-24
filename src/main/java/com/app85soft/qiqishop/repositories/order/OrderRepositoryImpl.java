@@ -97,6 +97,7 @@ public class OrderRepositoryImpl extends BaseRepository implements OrderReposito
                 .from(qOrder)
                 .leftJoin(qUser).on(qOrder.userId.eq(qUser.id))
                 .where(builder)
+                .orderBy(qOrder.id.desc())
                 .offset(page * PAGE_SIZE)
                 .limit(PAGE_SIZE)
                 .fetch();
