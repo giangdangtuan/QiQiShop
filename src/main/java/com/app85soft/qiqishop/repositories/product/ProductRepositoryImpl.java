@@ -107,7 +107,6 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
     @Override
     public List<ProductRes> getProduct(ActiveStatus status, String searchKeyword, List<Integer> categoryId,
                                        BigDecimal startPrice, BigDecimal endPrice, int page) {
-        log.info("categoryId = " + categoryId);
         BooleanBuilder builder = new BooleanBuilder();
         if (status != null) {
             builder.and(qProduct.status.eq(status));

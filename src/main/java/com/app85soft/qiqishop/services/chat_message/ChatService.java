@@ -14,4 +14,6 @@ public interface ChatService {
     List<ChatUserSummaryRes> getUsersMessagedAdmin();
 
     void markMessagesAsRead(int senderId, int recipientId);
+
+    Integer unreadCount();
 }

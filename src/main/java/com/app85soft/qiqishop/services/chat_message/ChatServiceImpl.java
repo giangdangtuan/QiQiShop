@@ -55,4 +55,10 @@ public class ChatServiceImpl  extends BaseService implements ChatService {
     public void markMessagesAsRead(int senderId, int recipientId) {
         chatMessageRepository.markMessagesAsRead(senderId, recipientId);
     }
+
+    @Override
+    public Integer unreadCount() {
+        User user = getUser();
+        return chatMessageRepository.unreadCount(user.getId());
+    }
 }

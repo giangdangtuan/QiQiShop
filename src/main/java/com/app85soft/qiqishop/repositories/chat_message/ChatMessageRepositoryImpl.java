@@ -55,7 +55,9 @@ public class ChatMessageRepositoryImpl extends BaseRepository implements ChatMes
                 .select(Projections.fields(ChatUserSummaryRes.class,
                         qUser.id.as("userId"),
                         qUser.name.as("userName"),
-                        qUploadFile.originUrl.as("avatarUrl"),
+                        qUser.avatarId.as("avatarId"),
+                        qUploadFile.originUrl.as("originUrl"),
+                        qUploadFile.thumbUrl.as("thumbUrl"),
                         qChatMessage.content.as("lastMessage"),
                         qChatMessage.createdAt.as("lastMessageTime"),
                         Expressions.as(
@@ -85,5 +87,22 @@ public class ChatMessageRepositoryImpl extends BaseRepository implements ChatMes
                         .and(q.deleted.isFalse()))
                 .set(q.seen, true)
                 .execute();
+    }
+
+    @Override
+    public Integer unreadCount(int userId) {
+        QChatMessage q = QChatMessage.chatMessage;
+
+        Long count = query()
+                .select(q.senderId.countDistinct())
+                .from(q)
+                .where(
+                        q.recipientId.eq(userId)
+                                .and(q.seen.isFalse())
+                                .and(q.deleted.isFalse())
+                )
+                .fetchOne();
+
+        return count != null ? count.intValue() : 0;
     }
 }

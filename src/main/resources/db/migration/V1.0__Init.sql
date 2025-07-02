@@ -535,6 +535,21 @@ CREATE TABLE `chat_message`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci;
 
+CREATE TABLE `wishlists`
+(
+    `id`            int unsigned NOT NULL AUTO_INCREMENT,
+    `user_id`       int unsigned NOT NULL,
+    `product_id`    int unsigned NOT NULL,
+    `deleted`       bit          NOT NULL DEFAULT 0,
+    `created_at`    timestamp    NOT NULL,
+    `updated_at`    timestamp    NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+    FOREIGN KEY (`product_id`) REFERENCES `product` (`id`)
+) ENGINE = InnoDB COMMENT ='Danh sách yêu thích'
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
 CREATE TABLE qrtz_scheduler_job_info
 (
     id              int unsigned NOT NULL AUTO_INCREMENT,

@@ -8,4 +8,6 @@ public interface ChatMessageRepositoryCustom {
     List<ChatUserSummaryRes> getUsersMessagedAdmin();
 
     void markMessagesAsRead(int senderId, int recipientId);
+
+    Integer unreadCount(int userId);
 }

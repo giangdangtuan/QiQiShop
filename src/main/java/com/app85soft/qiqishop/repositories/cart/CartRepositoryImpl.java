@@ -8,6 +8,7 @@ import com.app85soft.qiqishop.entities.model.QModel;
 import com.app85soft.qiqishop.entities.product.QProduct;
 import com.app85soft.qiqishop.entities.promotion.QPromotion;
 import com.app85soft.qiqishop.entities.promotion.QPromotionModel;
+import com.app85soft.qiqishop.entities.upload_file.QUploadFile;
 import com.app85soft.qiqishop.entities.user.QUser;
 import com.app85soft.qiqishop.repositories.BaseRepository;
 import com.querydsl.core.BooleanBuilder;
@@ -32,6 +33,7 @@ public class CartRepositoryImpl extends BaseRepository implements CartRepository
     private final QPromotion qPromotion = QPromotion.promotion;
     private final QPromotionModel qPromotionModel = QPromotionModel.promotionModel;
     private final QProduct qProduct = QProduct.product;
+    private final QUploadFile qUploadFile = QUploadFile.uploadFile;
 
     @Override
     public CartRes getCartByUserId(int userId) {
@@ -83,6 +85,7 @@ public class CartRepositoryImpl extends BaseRepository implements CartRepository
                 .innerJoin(qCartItem).on(qCartItem.cartId.eq(qCart.id))
                 .innerJoin(qModel).on(qModel.id.eq(qCartItem.modelId))
                 .innerJoin(qProduct).on(qProduct.id.eq(qModel.productId))
+                .innerJoin(qUploadFile).on(qProduct.coverImage.eq(qUploadFile.id))
                 .where(qCart.userId.eq(userId))
                 .select(Projections.fields(CartRes.CartItemRes.class,
                         qCartItem.id,
@@ -90,6 +93,8 @@ public class CartRepositoryImpl extends BaseRepository implements CartRepository
                         qProduct.name.as("productName"),
                         qModel.id.as("modelId"),
                         qModel.name.as("modelName"),
+                        qUploadFile.originUrl.as("originUrl"),
+                        qUploadFile.thumbUrl.as("thumbUrl"),
                         qCartItem.quantity,
                         qModel.stock.as("stock"),
                         qProduct.weight.as("weight"),

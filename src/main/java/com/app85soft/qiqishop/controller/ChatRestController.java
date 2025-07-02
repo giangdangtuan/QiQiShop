@@ -36,5 +36,10 @@ public class ChatRestController {
         chatService.markMessagesAsRead(senderId, recipientId);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/v1/chat/unread-count")
+    public ResponseEntity<BaseResponse<?>> getUnreadCount() {
+        return ResponseEntity.ok(new BaseResponse<>(chatService.unreadCount()));
+    }
 }
 

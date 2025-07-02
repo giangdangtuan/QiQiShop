@@ -41,7 +41,7 @@ public class CategoryServicelmpl extends BaseService implements CategoryService 
 
     @Override
     public Category addCategory(AddCategoryReq request) {
-    User user = getUser(PermissionKey.READ, PermissionType.PRODUCT);
+        User user = getUser(PermissionKey.READ, PermissionType.PRODUCT);
         if (categoryRepository.existsByName(request.getName())) {
             throw new BusinessException(Translator.toLocale("name_already_exists"), HttpStatus.BAD_REQUEST);
         }
@@ -53,24 +53,22 @@ public class CategoryServicelmpl extends BaseService implements CategoryService 
         return categoryRepository.save(newCategory);
     }
 
-    
-
-     @Override
-     public List<Integer> deleteCategory(IdsRequest request) {
-         User user = getUser(PermissionKey.DECISION, PermissionType.PRODUCT);
-         List<Integer> categoryIds = request.getIds();
-         List<Integer> existingIds = categoryRepository.getAllIdToCheckExist(categoryIds);
-         List<Integer> nonExistingIds = categoryIds.stream().filter(id -> !existingIds.contains(id)).toList();
-         if (!nonExistingIds.isEmpty()) {
-             throw new BusinessException(Translator.toLocale("id_not_exist"), HttpStatus.BAD_REQUEST);
-         }
-         List<Integer> productIds = productRepository.getAllIdByCategoryId(categoryIds);
-         if (!productIds.isEmpty()) {
-             productRepository.deleteProducts(productIds);
-         }
-         categoryRepository.deleteCategories(categoryIds);
-         return categoryIds;
-     }
+    @Override
+    public List<Integer> deleteCategory(IdsRequest request) {
+        User user = getUser(PermissionKey.DECISION, PermissionType.PRODUCT);
+        List<Integer> categoryIds = request.getIds();
+        List<Integer> existingIds = categoryRepository.getAllIdToCheckExist(categoryIds);
+        List<Integer> nonExistingIds = categoryIds.stream().filter(id -> !existingIds.contains(id)).toList();
+        if (!nonExistingIds.isEmpty()) {
+            throw new BusinessException(Translator.toLocale("id_not_exist"), HttpStatus.BAD_REQUEST);
+        }
+        List<Integer> productIds = productRepository.getAllIdByCategoryId(categoryIds);
+        if (!productIds.isEmpty()) {
+            productRepository.deleteProducts(productIds);
+        }
+        categoryRepository.deleteCategories(categoryIds);
+        return categoryIds;
+    }
 
     @Override
     public CategoryListRes getCategoryDetail(int catId) {
@@ -84,7 +82,7 @@ public class CategoryServicelmpl extends BaseService implements CategoryService 
     }
 
     @Override
-    public CategoryListRes  updateCategory(UpdateCategoryReq request) {
+    public CategoryListRes updateCategory(UpdateCategoryReq request) {
         User user = getUser(PermissionKey.CREATE, PermissionType.PRODUCT);
         Category currentCategory = categoryRepository.getCategoryToUpdate(request.getId());
         if (currentCategory == null) {
