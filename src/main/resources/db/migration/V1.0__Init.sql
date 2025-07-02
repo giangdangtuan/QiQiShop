@@ -550,6 +550,35 @@ CREATE TABLE `wishlists`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci;
 
+CREATE TABLE `notification`
+(
+    `id`            int unsigned    NOT NULL AUTO_INCREMENT,
+    `order_id`      int                      DEFAULT 0,
+    `title`         VARCHAR(255)    NOT NULL,
+    `message`       TEXT            NOT NULL,
+    `seen`          bit             NOT NULL DEFAULT 0,
+    `deleted`       bit             NOT NULL DEFAULT 0,
+    `created_at`    timestamp       NOT NULL,
+    `updated_at`    timestamp       NOT NULL,
+    PRIMARY KEY (id)
+) ENGINE = InnoDB COMMENT ='Thông báo'
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
+CREATE TABLE `contact`
+(
+    `id`            int unsigned    NOT NULL AUTO_INCREMENT,
+    `name`          VARCHAR(255)    NOT NULL,
+    `email`         VARCHAR(255)    NOT NULL,
+    `content`       TEXT            NOT NULL,
+    `deleted`       bit             NOT NULL DEFAULT 0,
+    `created_at`    timestamp       NOT NULL,
+    `updated_at`    timestamp       NOT NULL,
+    PRIMARY KEY (id)
+) ENGINE = InnoDB COMMENT ='Contact'
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
+
 CREATE TABLE qrtz_scheduler_job_info
 (
     id              int unsigned NOT NULL AUTO_INCREMENT,
@@ -753,6 +782,7 @@ ALTER TABLE QRTZ_SIMPROP_TRIGGERS
 
 ALTER TABLE QRTZ_TRIGGERS
     ADD FOREIGN KEY (SCHED_NAME, JOB_NAME, JOB_GROUP) REFERENCES QRTZ_JOB_DETAILS (SCHED_NAME, JOB_NAME, JOB_GROUP);
+
 
 INSERT INTO permissions (`id`, `title`, `permission`, `parent_permission`, `can_view`, `can_write`, `can_approval`,
                          `can_decision`, `type`, `status`, `created_at`, `updated_at`)

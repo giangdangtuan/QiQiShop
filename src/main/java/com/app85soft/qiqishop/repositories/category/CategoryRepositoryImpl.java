@@ -2,7 +2,6 @@ package com.app85soft.qiqishop.repositories.category;
 
 import java.util.List;
 
-import com.app85soft.qiqishop.dto.response.product.ProductDetailRes;
 import com.app85soft.qiqishop.entities.upload_file.QUploadFile;
 import org.springframework.stereotype.Repository;
 

@@ -13,8 +13,10 @@ import com.app85soft.qiqishop.dto.request.transaction.TransactionReq;
 import com.app85soft.qiqishop.dto.response.BaseResponse;
 import com.app85soft.qiqishop.dto.response.address.AddressRes;
 import com.app85soft.qiqishop.dto.response.cart.CartRes;
+import com.app85soft.qiqishop.dto.response.notification.OrderNotificationRes;
 import com.app85soft.qiqishop.dto.response.payment.CheckOutRes;
 import com.app85soft.qiqishop.dto.response.payment.ConfirmCheckOutRes;
+import com.app85soft.qiqishop.entities.notification.Notification;
 import com.app85soft.qiqishop.entities.order.Order;
 import com.app85soft.qiqishop.entities.order.OrderDetail;
 import com.app85soft.qiqishop.entities.order.OrderDetailBatch;
@@ -27,6 +29,7 @@ import com.app85soft.qiqishop.other_service.send_email.SendEmailService;
 import com.app85soft.qiqishop.repositories.address.AddressRepository;
 import com.app85soft.qiqishop.repositories.cart_item.CartItemRepository;
 import com.app85soft.qiqishop.repositories.model.ModelRepository;
+import com.app85soft.qiqishop.repositories.notification.NotificationRepository;
 import com.app85soft.qiqishop.repositories.order.OrderDetailBatchRepository;
 import com.app85soft.qiqishop.repositories.order.OrderDetailRepository;
 import com.app85soft.qiqishop.repositories.order.OrderRepository;
@@ -36,6 +39,7 @@ import com.app85soft.qiqishop.repositories.user.UserRepository;
 import com.app85soft.qiqishop.services.BaseService;
 import com.app85soft.qiqishop.services.vnpay.VnpayService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -58,6 +62,8 @@ public class PaymentServiceImpl extends BaseService implements PaymentService {
     private final OrderDetailBatchRepository orderDetailBatchRepository;
     private final SendEmailService sendEmailService;
     private final UserRepository userRepository;
+    private final SimpMessagingTemplate messagingTemplate;
+    private final NotificationRepository notificationRepository;
 
     @Override
     public BaseResponse<CheckOutRes> checkOut(CheckOutReq req) {
@@ -119,6 +125,25 @@ public class PaymentServiceImpl extends BaseService implements PaymentService {
                     .build();
 
             int orderId = saveOrderAndDetails(orderReq, transactionReq, items);
+
+            Notification saved = new Notification(
+                    orderId,
+                    "Đơn hàng mới",
+                    "🔔" + user.getName() + "đã đặt đơn hàng " + orderCode + ". Vui lòng kiểm tra và xác nhận đơn",
+                    false
+            );
+            notificationRepository.save(saved);
+
+            OrderNotificationRes socketNoti = new OrderNotificationRes(
+                    saved.getId(),
+                    saved.getOrderId(),
+                    saved.getTitle(),
+                    saved.getMessage(),
+                    saved.isSeen(),
+                    saved.getCreatedAt()
+            );
+            messagingTemplate.convertAndSend("/topic/order-notifications", socketNoti);
+
             String content = sendEmailService.buildInvoiceContent(orderId);
 
             EmailDetail emailDetail = new EmailDetail();
@@ -179,6 +204,25 @@ public class PaymentServiceImpl extends BaseService implements PaymentService {
                 .build();
 
         int orderId = saveOrderAndDetails(orderReq, transactionReq, items);
+        User user = userRepository.findById(userId).get();
+        Notification saved = new Notification(
+                orderId,
+                "Đơn hàng mới",
+                "🔔" + user.getName() + " đã đặt đơn hàng " + orderCode + ". Vui lòng kiểm tra và xác nhận đơn",
+                false
+        );
+        notificationRepository.save(saved);
+
+        OrderNotificationRes socketNoti = new OrderNotificationRes(
+                saved.getId(),
+                saved.getOrderId(),
+                saved.getTitle(),
+                saved.getMessage(),
+                saved.isSeen(),
+                saved.getCreatedAt()
+        );
+        messagingTemplate.convertAndSend("/topic/order-notifications", socketNoti);
+
         String content = sendEmailService.buildInvoiceContent(orderId);
 
         EmailDetail emailDetail = new EmailDetail();
