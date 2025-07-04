@@ -15,6 +15,7 @@ import com.app85soft.qiqishop.entities.product.QProduct;
 import com.app85soft.qiqishop.entities.product.QProductImage;
 import com.app85soft.qiqishop.entities.promotion.QPromotion;
 import com.app85soft.qiqishop.entities.promotion.QPromotionModel;
+import com.app85soft.qiqishop.entities.rating.QRating;
 import com.app85soft.qiqishop.entities.upload_file.QUploadFile;
 import com.app85soft.qiqishop.repositories.BaseRepository;
 import com.querydsl.core.BooleanBuilder;
@@ -44,6 +45,7 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
     private final QVariantOption qVariantOption = QVariantOption.variantOption;
     private final QVariantValue qVariantValue = QVariantValue.variantValue;
     private final QUploadFile qUploadFile = QUploadFile.uploadFile;
+    private final QRating qRating = QRating.rating;
 
     @Override
     public boolean existsByCode(String code) {
@@ -169,7 +171,27 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
             modelMap.put(productId, models);
         }
 
-        products.forEach(product -> product.setModels(modelMap.getOrDefault(product.getId(), new ArrayList<>())));
+        Map<Integer, Double> averageRatings = query()
+                .select(Projections.tuple(
+                        qRating.productId,
+                        qRating.ratingStar.avg()
+                ))
+                .from(qRating)
+                .where(qRating.productId.in(productIds)
+                        .and(qRating.deleted.eq(false)))
+                .groupBy(qRating.productId)
+                .fetch()
+                .stream()
+                .collect(Collectors.toMap(
+                        tuple -> tuple.get(qRating.productId),
+                        tuple -> Optional.ofNullable(tuple.get(qRating.ratingStar.avg())).orElse(5.0)
+                ));
+
+
+        products.forEach(product -> {
+            product.setModels(modelMap.getOrDefault(product.getId(), new ArrayList<>()));
+            product.setAverageRating(averageRatings.getOrDefault(product.getId(), 5.0));
+        });
 
         return products;
     }

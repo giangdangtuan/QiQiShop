@@ -15,7 +15,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ChatServiceImpl  extends BaseService implements ChatService {
+public class ChatServiceImpl extends BaseService implements ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
 

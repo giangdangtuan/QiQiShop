@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.app85soft.qiqishop.annotations.NoRequireAuth;
 import com.app85soft.qiqishop.dto.request.IdsRequest;
-import com.app85soft.qiqishop.dto.response.user.UserDetailRes;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

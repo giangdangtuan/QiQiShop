@@ -24,6 +24,7 @@ public class ProductRes {
     Integer weight;
     String description;
     ActiveStatus status;
+    Double averageRating;
 
     List<ModelRes> models;
 }

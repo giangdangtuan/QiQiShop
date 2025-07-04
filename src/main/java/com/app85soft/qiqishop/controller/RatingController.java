@@ -26,7 +26,7 @@ public class RatingController {
     }
 
     @Operation(summary = "Get list Rating.")
-    @GetMapping("v1/rating/list")
+    @GetMapping("rating/list")
     public ResponseEntity<BaseResponse<List<RatingRes>>> getRatings(@RequestParam int page,
                                                                     @Parameter(description = "[productId]")
                                                                     @RequestParam int productId) {
