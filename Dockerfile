@@ -12,7 +12,7 @@ FROM maven:3.9.9-eclipse-temurin-21 as build
 WORKDIR /app
 
 COPY pom.xml /app
-COPY src /app
+COPY src/ /app/src/
 COPY --from=deps /root/.m2 /root/.m2
 
 RUN mvn clean package -Dmaven.test.skip=true
