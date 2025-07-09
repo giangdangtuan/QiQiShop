@@ -17,5 +17,4 @@ public interface ProductService {
     List<Integer> deleteProducts(IdsRequest req);
     BaseResponse<List<ProductRes>> getProducts(ActiveStatus status, String name, List<Integer> categoryId, BigDecimal startPrice, BigDecimal endPrice, int page);
     BaseResponse<ProductDetailRes> getProduct(int productId);
-
 }
