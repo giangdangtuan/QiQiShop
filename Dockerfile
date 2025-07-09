@@ -28,6 +28,8 @@ COPY --from=build /app/target/qiqishop-0.0.1-SNAPSHOT.jar /app/qiqishop.jar
 
 COPY src/main/resources/application.properties /app/config/application.properties
 
+COPY oauth-key /app/oauth-key
+
 RUN chown -R 1000:1000 /app
 
 USER 1000
