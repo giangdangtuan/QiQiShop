@@ -24,7 +24,7 @@ WORKDIR /app
 
 RUN mkdir -p /app/uploads && mkdir -p /app/config && mkdir -p /app/log
 
-COPY --from=build /app/target/*.jar /app/karaoke.jar
+COPY --from=build /app/target/qiqishop-0.0.1-SNAPSHOT.jar /app/qiqishop.jar
 
 RUN chown -R 1000:1000 /app
 
