@@ -18,13 +18,15 @@ COPY --from=deps /root/.m2 /root/.m2
 RUN mvn clean package -Dmaven.test.skip=true
 
 ## Run stage ##
-FROM openjdk:23 as run
+FROM eclipse-temurin:21-jdk as run
 
 WORKDIR /app
 
 RUN mkdir -p /app/uploads && mkdir -p /app/config && mkdir -p /app/log
 
 COPY --from=build /app/target/qiqishop-0.0.1-SNAPSHOT.jar /app/qiqishop.jar
+
+COPY src/main/resources/application.properties /app/config/application.properties
 
 RUN chown -R 1000:1000 /app
 
