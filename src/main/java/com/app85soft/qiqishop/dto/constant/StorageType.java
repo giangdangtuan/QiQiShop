@@ -7,7 +7,9 @@ public enum StorageType {
     STORAGE_NFS_LOCAL,
     STORAGE_FTP,
     STORAGE_S3,
-    STORAGE_AZURE,    STORAGE_GCP;
+    STORAGE_AZURE,
+    STORAGE_GCP,
+    STORAGE_CLOUDINARY;
 
     public static StorageType getType(int index) {
         return StorageType.values()[index];

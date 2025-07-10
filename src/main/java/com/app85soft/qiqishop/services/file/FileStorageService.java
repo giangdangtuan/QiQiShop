@@ -10,4 +10,6 @@ public interface FileStorageService {
     UploadFile storeImage(final MultipartFile file);
     void deleteFile(int fileId);
     InputStream getInputStream(final String fileName);
+
+    String getPublicUrl(String path);
 }

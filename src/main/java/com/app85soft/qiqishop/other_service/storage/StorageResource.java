@@ -10,4 +10,7 @@ public interface StorageResource {
     boolean deleteFile(String file);
 
     String getUrl(String file);
+
+    String getPublicUrl(String path);
+
 }

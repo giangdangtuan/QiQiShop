@@ -1,6 +1,8 @@
 package com.app85soft.qiqishop.other_service.storage;
 
 import com.app85soft.qiqishop.dto.constant.StorageType;
+import com.app85soft.qiqishop.other_service.storage.cloudinary.StorageCloudinary;
+import com.app85soft.qiqishop.other_service.storage.cloudinary.StorageCloudinaryConfig;
 import com.app85soft.qiqishop.other_service.storage.ftp.StorageFtp;
 import com.app85soft.qiqishop.other_service.storage.ftp.StorageFtpConfig;
 import com.app85soft.qiqishop.other_service.storage.nfs.StorageLocal;
@@ -46,6 +48,12 @@ public class FileStorageConfig {
                 String username = environment.getProperty("file.ftp.username");
                 String password = environment.getProperty("file.ftp.password");
                 return new StorageFtp(new StorageFtpConfig(server, Integer.parseInt(port), username, password));
+            }
+            case STORAGE_CLOUDINARY -> {
+                String cloudName = environment.getProperty("cloudinary.cloud-name");
+                String apiKey = environment.getProperty("cloudinary.api-key");
+                String apiSecret = environment.getProperty("cloudinary.api-secret");
+                return new StorageCloudinary(new StorageCloudinaryConfig(cloudName, apiKey, apiSecret));
             }
             default -> {
                 String directory = environment.getProperty("file.upload-dir");

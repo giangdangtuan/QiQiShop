@@ -26,4 +26,9 @@ public class StorageGCP implements StorageResource {
     public String getUrl(String file) {
         return null;
     }
+
+    @Override
+    public String getPublicUrl(String path) {
+        return "";
+    }
 }

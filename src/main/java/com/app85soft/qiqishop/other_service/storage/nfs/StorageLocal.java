@@ -69,6 +69,11 @@ public class StorageLocal implements StorageResource {
         return config.getServerUrl() + file;
     }
 
+    @Override
+    public String getPublicUrl(String path) {
+        return "";
+    }
+
     private String fixPath(String path) {
         if (path.startsWith("/")) {
             path = path.substring(1);

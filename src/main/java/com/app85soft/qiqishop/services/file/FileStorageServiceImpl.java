@@ -8,6 +8,7 @@ import com.app85soft.qiqishop.repositories.media.MediaRepository;
 import com.app85soft.qiqishop.services.BaseService;
 import com.app85soft.qiqishop.util.Constants;
 import com.app85soft.qiqishop.util.Util;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.imgscalr.Scalr;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+@Slf4j
 @Service
 class FileStorageServiceImpl extends BaseService implements FileStorageService {
 
@@ -32,46 +34,102 @@ class FileStorageServiceImpl extends BaseService implements FileStorageService {
     @Autowired
     private MediaRepository mediaRepository;
 
-    public UploadFile storeImage(final MultipartFile file) {
-        String timeStamp = new SimpleDateFormat(Constants.YYYY_MM_DD_HH_mm_SSS).format(new Date());
-        String randomString = RandomStringUtils.random(6, Constants.ALPHA_NUM);
-        String fileName = Util.removeCharacterVn(StringUtils.cleanPath(file.getOriginalFilename().toLowerCase()));
-        String originalName = timeStamp + "_" + randomString + "_" + fileName;
-        String thumbName = timeStamp + "_" + randomString + "_thumb_" + fileName;
-        if (originalName.contains("..")) {
-            throw new BusinessException("Sorry! Filename contains invalid path sequence " + originalName);
-        }
-        String type = file.getContentType();
-        if ((type == null || !type.toLowerCase().startsWith("image")) && !originalName.endsWith("jpg") && !originalName.endsWith("jpeg") && !originalName.endsWith("png")) {
-            throw new BusinessException("File format error");
-        }
-        try {
-            BufferedImage bimg = ImageIO.read(file.getInputStream());
-            UploadFile image = new UploadFile();
-            if (bimg != null) {
-                image.setWidth(bimg.getWidth());
-                image.setHeight(bimg.getHeight());
-            }
-            image.setType(UploadFileType.IMAGE);
-            image.setSize(file.getSize());
-            image.setOriginFilePath(String.format("image/%s", originalName));
-            ByteArrayOutputStream thumbOutputStream = createThumbnail(file, type, fileName);
-            image.setOriginUrl(storageResource.writeResource(file.getInputStream(), "image/" + originalName));
-            if (thumbOutputStream != null) {
-                try (InputStream inputStream = new ByteArrayInputStream(thumbOutputStream.toByteArray())) {
-                    image.setThumbUrl(storageResource.writeResource(inputStream, "image/" + thumbName));
-                    image.setThumbFilePath(String.format("image/%s", thumbName));
-                }
-            } else {
-                image.setThumbUrl(image.getOriginUrl());
-            }
-            image = mediaRepository.save(image);
-            return image;
-        } catch (IOException exception) {
-            throw new BusinessException(exception.getMessage());
+//    public UploadFile storeImage(final MultipartFile file) {
+//        String timeStamp = new SimpleDateFormat(Constants.YYYY_MM_DD_HH_mm_SSS).format(new Date());
+//        String randomString = RandomStringUtils.random(6, Constants.ALPHA_NUM);
+//        String fileName = Util.removeCharacterVn(StringUtils.cleanPath(file.getOriginalFilename().toLowerCase()));
+//        String originalName = timeStamp + "_" + randomString + "_" + fileName;
+//        String thumbName = timeStamp + "_" + randomString + "_thumb_" + fileName;
+//        if (originalName.contains("..")) {
+//            throw new BusinessException("Sorry! Filename contains invalid path sequence " + originalName);
+//        }
+//        String type = file.getContentType();
+//        if ((type == null || !type.toLowerCase().startsWith("image")) && !originalName.endsWith("jpg") && !originalName.endsWith("jpeg") && !originalName.endsWith("png")) {
+//            throw new BusinessException("File format error");
+//        }
+//        try {
+//            BufferedImage bimg = ImageIO.read(file.getInputStream());
+//            UploadFile image = new UploadFile();
+//            if (bimg != null) {
+//                image.setWidth(bimg.getWidth());
+//                image.setHeight(bimg.getHeight());
+//            }
+//            image.setType(UploadFileType.IMAGE);
+//            image.setSize(file.getSize());
+//            image.setOriginFilePath(String.format("image/%s", originalName));
+//            ByteArrayOutputStream thumbOutputStream = createThumbnail(file, type, fileName);
+//            image.setOriginUrl(storageResource.writeResource(file.getInputStream(), "image/" + originalName));
+//            if (thumbOutputStream != null) {
+//                try (InputStream inputStream = new ByteArrayInputStream(thumbOutputStream.toByteArray())) {
+//                    image.setThumbUrl(storageResource.writeResource(inputStream, "image/" + thumbName));
+//                    image.setThumbFilePath(String.format("image/%s", thumbName));
+//                }
+//            } else {
+//                image.setThumbUrl(image.getOriginUrl());
+//            }
+//            image = mediaRepository.save(image);
+//            return image;
+//        } catch (IOException exception) {
+//            throw new BusinessException(exception.getMessage());
+//        }
+//
+//    }
+@Override
+public UploadFile storeImage(final MultipartFile file) {
+    log.info("[storeImage] Start storing image: {}", file.getOriginalFilename());
+
+    String timeStamp = new SimpleDateFormat(Constants.YYYY_MM_DD_HH_mm_SSS).format(new Date());
+    String randomString = RandomStringUtils.random(6, Constants.ALPHA_NUM);
+    String fileName = Util.removeCharacterVn(StringUtils.cleanPath(file.getOriginalFilename().toLowerCase()));
+    String originalName = timeStamp + "_" + randomString + "_" + fileName;
+
+    if (originalName.contains("..")) {
+        throw new BusinessException("Tên file chứa ký tự không hợp lệ: " + originalName);
+    }
+
+    String type = file.getContentType();
+    if ((type == null || !type.toLowerCase().startsWith("image")) &&
+            !(originalName.endsWith("jpg") || originalName.endsWith("jpeg") || originalName.endsWith("png"))) {
+        throw new BusinessException("Định dạng file không hợp lệ");
+    }
+
+    try {
+        byte[] fileBytes = file.getBytes();
+        InputStream reusableStream = new ByteArrayInputStream(fileBytes);
+        BufferedImage originalImage = ImageIO.read(new ByteArrayInputStream(fileBytes));
+
+        if (originalImage == null) {
+            throw new BusinessException("Không thể đọc ảnh từ file upload");
         }
 
+        UploadFile image = new UploadFile();
+        image.setType(UploadFileType.IMAGE);
+        image.setSize((long) fileBytes.length);
+        image.setWidth(originalImage.getWidth());
+        image.setHeight(originalImage.getHeight());
+        image.setOriginFilePath("image/" + originalName);
+
+        // Upload ảnh gốc
+        log.info("[storeImage] Uploading original image to Cloudinary: {}", originalName);
+        String originUrl = storageResource.writeResource(reusableStream, "image/" + originalName);
+        image.setOriginUrl(originUrl);
+
+        // Không tạo thumbnail => sử dụng originUrl cho thumb
+        image.setThumbUrl(originUrl);
+
+        UploadFile saved = mediaRepository.save(image);
+        log.info("[storeImage] Image saved successfully: id = {}", saved.getId());
+        return saved;
+
+    } catch (IOException e) {
+        log.error("[storeImage] Lỗi IO khi xử lý file", e);
+        throw new BusinessException("Không thể xử lý ảnh: " + e.getMessage());
+    } catch (RuntimeException e) {
+        log.error("[storeImage] Lỗi khi upload ảnh", e);
+        throw new BusinessException("Lỗi khi upload ảnh: " + e.getMessage());
     }
+}
+
 
     @Override
     public void deleteFile(int fileId) {
@@ -93,23 +151,49 @@ class FileStorageServiceImpl extends BaseService implements FileStorageService {
         return storageResource.readResource(fileName);
     }
 
-    private ByteArrayOutputStream createThumbnail(final MultipartFile originalFile, String contentType, String fileName) {
-        try {
-            String formatType;
-            if ((contentType != null && contentType.contains("png")) || fileName.contains("png")) {
-                formatType = "png";
-            } else {
-                formatType = "jpeg";
-            }
-            ByteArrayOutputStream thumbOutput = new ByteArrayOutputStream();
-            BufferedImage img = ImageIO.read(originalFile.getInputStream());
-            BufferedImage thumbImg = Scalr.resize(img, Scalr.Method.AUTOMATIC, Scalr.Mode.AUTOMATIC, Math.min(img.getWidth(), 1000), Scalr.OP_ANTIALIAS);
-            ImageIO.write(thumbImg, formatType, thumbOutput);
-            return thumbOutput;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//    private ByteArrayOutputStream createThumbnail(final MultipartFile originalFile, String contentType, String fileName) {
+//        try {
+//            String formatType;
+//            if ((contentType != null && contentType.contains("png")) || fileName.contains("png")) {
+//                formatType = "png";
+//            } else {
+//                formatType = "jpeg";
+//            }
+//            ByteArrayOutputStream thumbOutput = new ByteArrayOutputStream();
+//            BufferedImage img = ImageIO.read(originalFile.getInputStream());
+//            BufferedImage thumbImg = Scalr.resize(img, Scalr.Method.AUTOMATIC, Scalr.Mode.AUTOMATIC, Math.min(img.getWidth(), 1000), Scalr.OP_ANTIALIAS);
+//            ImageIO.write(thumbImg, formatType, thumbOutput);
+//            return thumbOutput;
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
+private ByteArrayOutputStream createThumbnail(BufferedImage img, String contentType, String fileName) {
+    try {
+        String formatType = (contentType != null && contentType.contains("png")) || fileName.contains("png") ? "png" : "jpeg";
+        ByteArrayOutputStream thumbOutput = new ByteArrayOutputStream();
+
+        BufferedImage thumbImg = Scalr.resize(
+                img,
+                Scalr.Method.AUTOMATIC,
+                Scalr.Mode.AUTOMATIC,
+                Math.min(img.getWidth(), 1000),
+                Scalr.OP_ANTIALIAS
+        );
+
+        ImageIO.write(thumbImg, formatType, thumbOutput);
+        return thumbOutput;
+    } catch (IOException e) {
+        log.error("[createThumbnail] Lỗi khi tạo thumbnail", e);
         return null;
+    }
+}
+
+
+    @Override
+    public String getPublicUrl(String path) {
+        return storageResource.getPublicUrl(path);
     }
 
 }

@@ -7,11 +7,13 @@ import com.app85soft.qiqishop.exceptions.BusinessException;
 import com.app85soft.qiqishop.services.file.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -58,6 +60,20 @@ public class FileController {
         return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG)
                 .body(new InputStreamResource(fileStorageService.getInputStream("image/" + fileName)));
     }
+
+    @GetMapping("/public/{folder}/{filename}")
+    public ResponseEntity<Void> getImage(
+            @PathVariable String folder,
+            @PathVariable String filename) {
+
+        String path = folder + "/" + filename;
+        String url = fileStorageService.getPublicUrl(path);
+
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create(url))
+                .build();
+    }
+
 
 }
 
