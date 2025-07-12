@@ -166,7 +166,7 @@ public class PaymentServiceImpl extends BaseService implements PaymentService {
         } else {
             throw new BusinessException("payment_method_invalid");
         }
-
+        System.out.println("🔗 Payment URL: " + paymentUrl);
         ConfirmCheckOutRes res = ConfirmCheckOutRes.builder()
                 .orderCode(orderCode)
                 .totalAmount(totalAmount)
