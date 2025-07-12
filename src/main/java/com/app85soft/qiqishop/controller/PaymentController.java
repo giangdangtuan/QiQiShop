@@ -47,7 +47,7 @@ public class PaymentController {
     @GetMapping("/v1/vnpay-return")
     public RedirectView vnpayReturn(@RequestParam Map<String, String> params, HttpServletRequest request) {
         String queryString = request.getQueryString();
-        String redirectUrl = "http://localhost:5173/checkout/status";
+        String redirectUrl = "https://qi-qi-shop-fe.vercel.app/checkout/status";
         if (queryString != null) {
             redirectUrl += "?" + queryString;
         }
