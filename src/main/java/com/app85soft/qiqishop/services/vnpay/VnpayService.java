@@ -22,7 +22,7 @@ public class VnpayService {
     public String createOrder(BigDecimal total, String orderCode, List<Integer> cartItemIds, int userId, int addressId, String note, BigDecimal shippingCost) {
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
-        String vnp_IpAddr = requestUtil.getClientIp();
+//        String vnp_IpAddr = requestUtil.getClientIp();
         String vnp_TmnCode = config.vnp_TmnCode;
         String orderType = "order-type";
 
@@ -42,7 +42,7 @@ public class VnpayService {
         vnp_Params.put("vnp_Locale", "vn");
 
         vnp_Params.put("vnp_ReturnUrl", config.vnp_Returnurl);
-        vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
+//        vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
 
         Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
