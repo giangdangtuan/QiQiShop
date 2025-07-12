@@ -1,6 +1,7 @@
 package com.app85soft.qiqishop.services.vnpay;
 
 import com.app85soft.qiqishop.configuration.VnpayConfig;
+import com.app85soft.qiqishop.util.RequestUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,11 +17,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class VnpayService {
     private final VnpayConfig config;
+    private final RequestUtil requestUtil;
 
     public String createOrder(BigDecimal total, String orderCode, List<Integer> cartItemIds, int userId, int addressId, String note, BigDecimal shippingCost) {
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
-        String vnp_IpAddr = "127.0.0.1";
+        String vnp_IpAddr = requestUtil.getClientIp();
         String vnp_TmnCode = config.vnp_TmnCode;
         String orderType = "order-type";
 
